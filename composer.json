@@ -1,0 +1,34 @@
+{
+  "name": "andreapollastri/checkpoint",
+  "description": "Laravel security scanner — checks CVEs, hardcoded secrets, SQL injection, XSS and more via a single Artisan command.",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": "^8.2",
+    "illuminate/support": "^10.0|^11.0|^12.0",
+    "illuminate/console": "^10.0|^11.0|^12.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^8.0|^9.0|^10.0",
+    "phpunit/phpunit": "^10.0|^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Checkpoint\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Checkpoint\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Checkpoint\\CheckpointServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
