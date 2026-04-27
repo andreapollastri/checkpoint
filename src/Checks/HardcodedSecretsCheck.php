@@ -9,7 +9,7 @@ class HardcodedSecretsCheck extends AbstractCheck
     // Matches assignment of secret-sounding keys to literal string values
     private const PATTERNS = [
         // Array key => 'literal value'  or  ->method('literal')  for secret-named keys
-        '/["\'](?:password|passwd|pwd|secret|api_key|apikey|api_secret|token|auth_token|access_token|private_key|client_secret|app_secret|webhook_secret|refresh_token|bearer|authorization|gitlab_token|gitlab_pat|google_api_key|gcp_key|paypal_secret|paypal_client_secret|stripe_key|twilio_token|sendgrid_key|mailgun_key|slack_token|discord_token|notion_token|openai_key|openai_api_key|anthropic_key|anthropic_api_key|claude_api_key|claude_key|mistral_api_key|groq_api_key|replicate_api_key|replicate_token|huggingface_token|hf_token|perplexity_api_key|together_api_key|gemini_api_key|vertex_api_key|openrouter_api_key|fireworks_api_key|xai_api_key|grok_api_key|elevenlabs_api_key|elevenlabs_apikey|cohere_api_key|langchain_api_key|langsmith_api_key|langfuse_secret_key|langfuse_public_key|databricks_token|npm_token|pypi_token|shopify_token|mapbox_token|square_token|firebase_key|oauth_secret|signing_secret|encryption_key|db_password|database_password)["\']\s*=>\s*["\'][^"\']{4,}["\']/i',
+        '/["\'](?:password|passwd|pwd|secret|api_key|apikey|api_secret|token|auth_token|access_token|private_key|client_secret|app_secret|webhook_secret|refresh_token|bearer|authorization|gitlab_token|gitlab_pat|google_api_key|gcp_key|paypal_secret|paypal_client_secret|stripe_key|twilio_token|sendgrid_key|mailgun_key|slack_token|discord_token|notion_token|openai_key|openai_api_key|anthropic_key|anthropic_api_key|claude_api_key|claude_key|mistral_api_key|groq_api_key|replicate_api_key|replicate_token|huggingface_token|hf_token|perplexity_api_key|together_api_key|gemini_api_key|vertex_api_key|openrouter_api_key|fireworks_api_key|xai_api_key|grok_api_key|elevenlabs_api_key|elevenlabs_apikey|cohere_api_key|langchain_api_key|langsmith_api_key|langfuse_secret_key|langfuse_public_key|voyage_api_key|jina_api_key|databricks_token|npm_token|pypi_token|shopify_token|mapbox_token|square_token|firebase_key|oauth_secret|signing_secret|encryption_key|db_password|database_password)["\']\s*=>\s*["\'][^"\']{4,}["\']/i',
         // $variable = 'literal' where variable name looks like a secret
         '/\$(?:password|secret|api_key|apikey|token|access_token|private_key|client_secret|gitlab_token|google_api_key|paypal_secret|refresh_token|webhook_secret|anthropic_key|claude_key|openai_key|groq_key|mistral_key|hf_token|replicate_token|perplexity_key|langsmith_key|langfuse_secret)\s*=\s*["\'][^"\']{4,}["\']/i',
         // AWS access keys
@@ -56,10 +56,12 @@ class HardcodedSecretsCheck extends AbstractCheck
         '/pplx-[A-Za-z0-9_-]{20,}/',
         '/xai-[A-Za-z0-9_-]{20,}/',
         '/fw_[A-Za-z0-9_-]{20,}/',
+        // Voyage (embeddings) / Jina AI
+        '/pa-[A-Za-z0-9_-]{30,}/',
+        '/jina_[A-Za-z0-9_-]{20,}/',
         // Langfuse (LLM observability) / LangSmith (LangChain)
         '/sk-lf-[A-Za-z0-9_-]{20,}/',
-        '/lsv2_pt_[A-Za-z0-9_-]{20,}/',
-        '/lsv2_sk_[A-Za-z0-9_-]{20,}/',
+        '/lsv2_(?:pt|sk)_[A-Za-z0-9_-]{20,}/',
         // npm / PyPI / Rubygems
         '/npm_[A-Za-z0-9]{36,}/',
         '/pypi-AgE[Ii][0-9A-Za-z_-]{50,}/',
