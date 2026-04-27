@@ -1,0 +1,33 @@
+# Dependencies (this is a library — consumers resolve their own tree)
+/vendor/
+
+# Do not commit the lock for library packages; optional if you prefer reproducible CI
+/composer.lock
+
+# PHPUnit
+.phpunit.result.cache
+
+# Test / coverage
+/coverage/
+/coverage.xml
+.clover
+.php-cs-fixer.cache
+.phpcs-cache
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*~
+
+# Env & secrets (local tooling)
+.env
+.env.*
+!.env.example
+
+# Build / dist (if you add any later)
+/build/
+*.log

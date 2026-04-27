@@ -8,6 +8,16 @@ php artisan checkpoint:scan
 
 ---
 
+## Framework support
+
+**Checkpoint** targets **Laravel 8 through Laravel 13** (via `illuminate/support` and `illuminate/console` 8.x–13.x). Install it on any app whose Laravel version matches that range.
+
+- The package itself requires **PHP 8.1+**. Newer Laravel releases may require a **higher** PHP version for your application (for example, Laravel 13 often ships with **PHP 8.3+** in practice). Your project’s `php` and `laravel/framework` constraints still apply on top of Checkpoint’s own requirements.
+
+**Recent changes (compatibility):** dependency constraints were widened so installation works across the full range above, including **Laravel 8** and **Laravel 13** (previously the README only mentioned Laravel 10–12, and the package did not list Laravel 8 or 13 explicitly).
+
+---
+
 ## What it checks
 
 | # | Check | Severity |
@@ -32,8 +42,8 @@ php artisan checkpoint:scan
 
 ## Requirements
 
-- PHP **8.2+**
-- Laravel **10**, **11**, or **12**
+- **PHP** `^8.1` (see [Framework support](#framework-support) for how your Laravel version may raise the floor)
+- **Laravel** `8`–`13` (same major as `illuminate/*` 8.x–13.x used by your app)
 
 ---
 
