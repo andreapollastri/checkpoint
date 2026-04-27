@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkpoint — Laravel Security Scanner</title>
+  <meta name="description" content="A Laravel security scanner that audits your application for common vulnerabilities — from known CVEs to hardcoded secrets — via a single Artisan command." />
+  <meta property="og:title" content="Checkpoint — Laravel Security Scanner" />
+  <meta property="og:description" content="Audit your Laravel app for 15 vulnerability categories with a single Artisan command." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080b10;
+      --surface:   #0d1117;
+      --card:      #111820;
+      --border:    #1e2d3d;
+      --accent:    #e11d48;
+      --accent2:   #f43f5e;
+      --green:     #10b981;
+      --yellow:    #f59e0b;
+      --red:       #ef4444;
+      --blue:      #3b82f6;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ---------- NOISE OVERLAY ---------- */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ---------- GRID BACKGROUND ---------- */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(225,29,72,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(225,29,72,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ---------- NAV ---------- */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(8,11,16,.8);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent);
+      letter-spacing: -.02em;
+    }
+
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .875rem;
+      font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .btn-gh {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: var(--accent);
+      color: #fff !important;
+      padding: .45rem 1.1rem;
+      border-radius: 6px;
+      font-size: .8rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background .2s, transform .15s;
+    }
+    .btn-gh:hover { background: var(--accent2); transform: translateY(-1px); }
+
+    /* ---------- HERO ---------- */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 1.5rem 5rem;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 800px; height: 500px;
+      background: radial-gradient(ellipse at center, rgba(225,29,72,.18) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -55%);
+      pointer-events: none;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      border: 1px solid rgba(225,29,72,.35);
+      background: rgba(225,29,72,.08);
+      color: var(--accent2);
+      padding: .3rem 1rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .4; transform: scale(.7); }
+    }
+
+    h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1;
+      margin-bottom: 1.25rem;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--muted);
+      max-width: 580px;
+      margin: 0 auto 2.5rem;
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 4rem;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: var(--accent);
+      color: #fff;
+      padding: .75rem 1.75rem;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 0 30px rgba(225,29,72,.3);
+    }
+    .btn-primary:hover {
+      background: var(--accent2);
+      transform: translateY(-2px);
+      box-shadow: 0 0 45px rgba(225,29,72,.45);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      padding: .75rem 1.75rem;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color .2s, background .2s, transform .15s;
+    }
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      background: rgba(225,29,72,.06);
+      transform: translateY(-2px);
+    }
+
+    /* ---------- TERMINAL ---------- */
+    .terminal {
+      background: #0a0f1a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      max-width: 700px;
+      width: 100%;
+      text-align: left;
+      box-shadow: 0 32px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04);
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      background: #111820;
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ef4444; }
+    .dot-y { background: #f59e0b; }
+    .dot-g { background: #10b981; }
+
+    .terminal-title {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--muted);
+      margin-left: .5rem;
+    }
+
+    .terminal-body {
+      padding: 1.25rem 1.5rem;
+      font-family: var(--mono);
+      font-size: .8rem;
+      line-height: 1.9;
+      overflow-x: auto;
+    }
+
+    .t-prompt { color: var(--accent); }
+    .t-cmd    { color: var(--text); }
+    .t-pass   { color: var(--green); }
+    .t-fail   { color: var(--red); }
+    .t-warn   { color: var(--yellow); }
+    .t-muted  { color: var(--muted); }
+    .t-detail { color: #94a3b8; padding-left: 1rem; }
+    .t-summary { color: var(--text); font-weight: 700; }
+
+    /* ---------- SECTION ---------- */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 5rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .75rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.75rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 560px;
+      margin-bottom: 3rem;
+    }
+
+    /* ---------- CHECKS GRID ---------- */
+    .checks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .check-card {
+      background: var(--card);
+      padding: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: background .2s;
+    }
+    .check-card:hover { background: #161f2a; }
+
+    .check-num {
+      font-family: var(--mono);
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: .2rem .45rem;
+      flex-shrink: 0;
+      margin-top: .15rem;
+    }
+
+    .check-body { flex: 1; min-width: 0; }
+
+    .check-name {
+      font-size: .9rem;
+      font-weight: 600;
+      margin-bottom: .3rem;
+      color: var(--text);
+    }
+
+    .check-desc {
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .sev {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: .15rem .45rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: .15rem;
+    }
+    .sev-fail { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.25); }
+    .sev-warn { background: rgba(245,158,11,.12); color: var(--yellow); border: 1px solid rgba(245,158,11,.2); }
+
+    /* ---------- INSTALL ---------- */
+    .install-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .install-wrap { grid-template-columns: 1fr; }
+    }
+
+    .code-block {
+      background: #0a0f1a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .65rem 1rem;
+      background: #111820;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-lang {
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .copy-btn {
+      font-family: var(--mono);
+      font-size: .65rem;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: .15rem .5rem;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    pre {
+      padding: 1.25rem 1.5rem;
+      font-family: var(--mono);
+      font-size: .8rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      color: var(--text);
+    }
+
+    pre .cmd  { color: #a5f3fc; }
+    pre .flag { color: #c4b5fd; }
+    pre .arg  { color: #fde68a; }
+    pre .comment { color: var(--muted); font-style: italic; }
+
+    /* ---------- FEATURES ---------- */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .feature-card:hover {
+      border-color: rgba(225,29,72,.4);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      width: 40px; height: 40px;
+      background: rgba(225,29,72,.1);
+      border: 1px solid rgba(225,29,72,.2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: .5rem;
+    }
+
+    .feature-desc {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ---------- STATS ---------- */
+    .stats-bar {
+      position: relative;
+      z-index: 1;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stats-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 2rem;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      color: var(--accent);
+      font-family: var(--mono);
+    }
+
+    .stat-label {
+      font-size: .8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 600;
+      margin-top: .25rem;
+    }
+
+    /* ---------- FOOTER ---------- */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: gap;
+      gap: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-copy {
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    .footer-copy a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .footer-copy a:hover { text-decoration: underline; }
+
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a {
+      font-size: .8rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    /* ---------- DIVIDER ---------- */
+    .divider {
+      position: relative;
+      z-index: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ---------- SCROLLBAR ---------- */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ---------- RESPONSIVE NAV ---------- */
+    @media (max-width: 600px) {
+      .nav-links a:not(.btn-gh) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <!-- NAV -->
+  <nav>
+    <span class="nav-logo">[ checkpoint ]</span>
+    <div class="nav-links">
+      <a href="#checks">Checks</a>
+      <a href="#install">Install</a>
+      <a href="#features">Features</a>
+      <a href="https://github.com/andreapollastri/checkpoint" target="_blank" rel="noopener" class="btn-gh">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-glow"></div>
+
+    <div class="badge">
+      <span class="badge-dot"></span>
+      Laravel Security Scanner
+    </div>
+
+    <h1>Secure your<br><span>Laravel app.</span></h1>
+
+    <p class="hero-sub">
+      Audit your application for 15 vulnerability categories — from CVEs to hardcoded secrets — with a single Artisan command.
+    </p>
+
+    <div class="hero-actions">
+      <a href="https://github.com/andreapollastri/checkpoint" target="_blank" rel="noopener" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        View on GitHub
+      </a>
+      <a href="#install" class="btn-secondary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Quick Install
+      </a>
+    </div>
+
+    <!-- TERMINAL -->
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="dot dot-r"></span>
+        <span class="dot dot-y"></span>
+        <span class="dot dot-g"></span>
+        <span class="terminal-title">~ php artisan checkpoint:scan</span>
+      </div>
+      <div class="terminal-body">
+        <pre class="t-muted" style="white-space:pre;margin:0;padding:0;font-family:var(--mono);font-size:.8rem;line-height:1.9;">  ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗██████╗  ██████╗ ██╗███╗  ██╗████████╗
+ ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝██╔══██╗██╔═══██╗██║████╗ ██║╚══██╔══╝
+ ██║     ███████║█████╗  ██║     █████╔╝ ██████╔╝██║   ██║██║██╔██╗██║   ██║
+ ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗ ██╔═══╝ ██║   ██║██║██║╚████║   ██║
+  ╚█████╗██║  ██║███████╗ ╚█████╗██║  ██╗██║      ╚█████╔╝██║██║ ╚███║   ██║
+   ╚════╝╚═╝  ╚═╝╚══════╝  ╚════╝╚═╝  ╚═╝╚═╝       ╚════╝ ╚═╝╚═╝  ╚══╝   ╚═╝</pre>
+        <br/>
+        <div><span class="t-pass">  PASS</span>  <span class="t-cmd">Composer CVE Audit</span></div>
+        <div><span class="t-muted">        No known CVEs in Composer dependencies.</span></div>
+        <br/>
+        <div><span class="t-fail">  FAIL</span>  <span class="t-cmd">Hardcoded Secrets</span></div>
+        <div class="t-detail">✗ app/Services/PaymentService.php:14 — 'api_key' =&gt; 'sk_live_abc123…'</div>
+        <div class="t-detail">✗ config/services.php:8 — $secret = 'supersecretvalue'</div>
+        <br/>
+        <div><span class="t-warn">  WARN</span>  <span class="t-cmd">Environment Configuration</span></div>
+        <div class="t-detail">⚑ APP_DEBUG is true — stack traces exposed to end users.</div>
+        <br/>
+        <div><span class="t-muted">  ─────────────────────────────────────────────────────</span></div>
+        <div>  <span class="t-summary">Summary</span>  <span class="t-pass">12 passed</span>  <span class="t-warn">2 warning(s)</span>  <span class="t-fail">1 failed</span>  <span class="t-muted">(15 checks total)</span></div>
+        <br/>
+        <div>  <span class="t-fail">Scan result: FAIL — fix the issues above before deploying.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div>
+        <div class="stat-num">15</div>
+        <div class="stat-label">Security Checks</div>
+      </div>
+      <div>
+        <div class="stat-num">8–13</div>
+        <div class="stat-label">Laravel Versions</div>
+      </div>
+      <div>
+        <div class="stat-num">8.1+</div>
+        <div class="stat-label">PHP Required</div>
+      </div>
+      <div>
+        <div class="stat-num">1</div>
+        <div class="stat-label">Command to Run</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKS -->
+  <section id="checks">
+    <div class="section-label">Vulnerability Coverage</div>
+    <h2 class="section-title">15 checks. Zero excuses.</h2>
+    <p class="section-sub">Every scan covers the OWASP Top 10 and Laravel-specific pitfalls automatically.</p>
+
+    <div class="checks-grid">
+
+      <div class="check-card">
+        <span class="check-num">01</span>
+        <div class="check-body">
+          <div class="check-name">Composer CVE Audit</div>
+          <div class="check-desc">Runs <code style="font-family:var(--mono);color:var(--accent)">composer audit</code> and reports known advisories in your PHP dependencies.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">02</span>
+        <div class="check-body">
+          <div class="check-name">NPM CVE Audit</div>
+          <div class="check-desc">Runs <code style="font-family:var(--mono);color:var(--accent)">npm audit</code> and flags critical and high-severity vulnerabilities.</div>
+        </div>
+        <span class="sev sev-fail">FAIL/WARN</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">03</span>
+        <div class="check-body">
+          <div class="check-name">Environment Configuration</div>
+          <div class="check-desc">Audits APP_DEBUG, APP_KEY, APP_URL, and SESSION_SECURE_COOKIE for unsafe values.</div>
+        </div>
+        <span class="sev sev-warn">WARN</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">04</span>
+        <div class="check-body">
+          <div class="check-name">.gitignore Sensitive Files</div>
+          <div class="check-desc">Ensures .env, *.key, *.pem are excluded and .env is not tracked by git.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">05</span>
+        <div class="check-body">
+          <div class="check-name">File Permissions</div>
+          <div class="check-desc">Flags world-readable .env files and world-writable storage directories.</div>
+        </div>
+        <span class="sev sev-warn">WARN</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">06</span>
+        <div class="check-body">
+          <div class="check-name">Hardcoded Secrets</div>
+          <div class="check-desc">Scans PHP/JS for API keys, Stripe tokens, AWS credentials, GitHub PATs, PEM headers.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">07</span>
+        <div class="check-body">
+          <div class="check-name">SQL Injection</div>
+          <div class="check-desc">Detects raw queries with variable interpolation in DB::select and ->whereRaw().</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">08</span>
+        <div class="check-body">
+          <div class="check-name">Mass Assignment</div>
+          <div class="check-desc">Finds $guarded = [], Model::unguard(), or models missing fillable/guarded definitions.</div>
+        </div>
+        <span class="sev sev-warn">WARN</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">09</span>
+        <div class="check-body">
+          <div class="check-name">XSS</div>
+          <div class="check-desc">Flags unescaped {!! $var !!} in Blade views and raw echo of request input.</div>
+        </div>
+        <span class="sev sev-warn">WARN</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">10</span>
+        <div class="check-body">
+          <div class="check-name">CSRF Protection</div>
+          <div class="check-desc">Detects forms with POST/PUT/PATCH/DELETE missing @csrf and verifies middleware presence.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">11</span>
+        <div class="check-body">
+          <div class="check-name">Open Redirect</div>
+          <div class="check-desc">Spots redirect($request->…) or header('Location: '. $var) with unvalidated input.</div>
+        </div>
+        <span class="sev sev-warn">WARN</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">12</span>
+        <div class="check-body">
+          <div class="check-name">Command Injection</div>
+          <div class="check-desc">Finds exec, shell_exec, system, passthru, proc_open called with unescaped variables.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">13</span>
+        <div class="check-body">
+          <div class="check-name">Insecure Deserialization</div>
+          <div class="check-desc">Detects unserialize($userInput) and the classic unserialize(base64_decode(…)) exploit chain.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">14</span>
+        <div class="check-body">
+          <div class="check-name">Debug Functions</div>
+          <div class="check-desc">Finds var_dump, dd, dump, ray left in production code outside of test files.</div>
+        </div>
+        <span class="sev sev-warn">WARN</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">15</span>
+        <div class="check-body">
+          <div class="check-name">Sensitive Data Exposure</div>
+          <div class="check-desc">Flags display_errors = 1, logging of passwords/tokens, and Telescope always-on configuration.</div>
+        </div>
+        <span class="sev sev-warn">WARN</span>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- INSTALL -->
+  <section id="install">
+    <div class="section-label">Get Started</div>
+    <h2 class="section-title">Up and running<br>in seconds.</h2>
+    <p class="section-sub">Install as a dev dependency. Auto-discovers itself via Laravel's service provider — no registration needed.</p>
+
+    <div class="install-wrap">
+      <div>
+        <div class="code-block" style="margin-bottom:1.25rem">
+          <div class="code-header">
+            <span class="code-lang">bash — install</span>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('composer require --dev andreapollastri/checkpoint'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+          </div>
+          <pre><span class="cmd">composer</span> require --dev <span class="arg">andreapollastri/checkpoint</span></pre>
+        </div>
+
+        <div class="code-block" style="margin-bottom:1.25rem">
+          <div class="code-header">
+            <span class="code-lang">bash — run all checks</span>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:scan'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+          </div>
+          <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:scan</span></pre>
+        </div>
+
+        <div class="code-block" style="margin-bottom:1.25rem">
+          <div class="code-header">
+            <span class="code-lang">bash — run specific checks</span>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:scan --only=\"SQL Injection Risks,CSRF Protection\"'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+          </div>
+          <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:scan</span> <span class="flag">--only</span>=<span class="arg">"SQL Injection Risks,CSRF Protection"</span></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">bash — CI/CD JSON output</span>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:scan --json | tee checkpoint-report.json'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+          </div>
+          <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:scan</span> <span class="flag">--json</span> | tee checkpoint-report.json</pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="code-block" style="margin-bottom:1.25rem">
+          <div class="code-header">
+            <span class="code-lang">yaml — GitHub Actions</span>
+          </div>
+          <pre><span class="comment"># .github/workflows/security.yml</span>
+- name: Security audit
+  run: <span class="arg">php artisan checkpoint:scan --json</span>
+       | tee checkpoint-report.json</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">php — custom check</span>
+          </div>
+          <pre><span class="cmd">class</span> <span class="arg">MyCheck</span> extends AbstractCheck
+{
+    <span class="cmd">public function</span> <span class="arg">name</span>(): string
+    {
+        return <span class="flag">'My Custom Check'</span>;
+    }
+
+    <span class="cmd">public function</span> <span class="arg">run</span>(): CheckResult
+    {
+        <span class="comment">// your logic here</span>
+        return CheckResult::<span class="arg">pass</span>(<span class="flag">'All good.'</span>);
+    }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section-label">Why Checkpoint</div>
+    <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+    <p class="section-sub">Designed for developers who ship fast and need security that keeps up.</p>
+
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <div class="feature-title">Single Command</div>
+        <div class="feature-desc">One Artisan command covers your entire security surface. No configuration files, no complex setup.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">CI/CD Ready</div>
+        <div class="feature-desc">Exits with code 1 on any FAIL result, making it a perfect pipeline gate in GitHub Actions or any CI system.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <div class="feature-title">JSON Output</div>
+        <div class="feature-desc">Structured JSON output for integration with dashboards, reporting tools, and automated workflows.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">Selective Scanning</div>
+        <div class="feature-desc">Use --only or --skip flags to run exactly the checks you need, nothing more.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔌</div>
+        <div class="feature-title">Extensible</div>
+        <div class="feature-desc">Extend AbstractCheck to add custom vulnerability checks specific to your application logic.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <div class="feature-title">Laravel Native</div>
+        <div class="feature-desc">Auto-discovers via Laravel's package discovery. Supports Laravel 8 through 13 with PHP 8.1+.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-copy">
+      &copy; 2024 <a href="https://andreapollastri.net" target="_blank" rel="noopener">Andrea Pollastri</a> — MIT License
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/andreapollastri/checkpoint" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://packagist.org/packages/andreapollastri/checkpoint" target="_blank" rel="noopener">Packagist</a>
+      <a href="https://github.com/andreapollastri/checkpoint/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+    </div>
+  </footer>
+
+</body>
+</html>
