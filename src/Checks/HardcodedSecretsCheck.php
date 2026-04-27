@@ -118,6 +118,9 @@ class HardcodedSecretsCheck extends AbstractCheck
 
     private const FACTORY_ROOT = 'database/factories/';
 
+    // Migrations, seeders, and factories are dev-time / known test data, not app secrets
+    private const DATABASE_ROOT = 'database/';
+
     private const SAFE_FUNCTIONS = [
         'env(',
         'config(',
@@ -154,6 +157,10 @@ class HardcodedSecretsCheck extends AbstractCheck
                 continue;
             }
 
+            if ($this->isDatabaseFile($relative)) {
+                continue;
+            }
+
             $isFactory = $this->isFactoryFile($relative);
 
             foreach ($lines as $i => $line) {
@@ -175,6 +182,10 @@ class HardcodedSecretsCheck extends AbstractCheck
                             $isSafe = true;
                             break;
                         }
+                    }
+
+                    if (! $isSafe && $this->isLaravelPasswordHashedCast($line)) {
+                        $isSafe = true;
                     }
 
                     if (! $isSafe) {
@@ -227,5 +238,18 @@ class HardcodedSecretsCheck extends AbstractCheck
     private function isFactoryFile(string $relativePath): bool
     {
         return str_starts_with($relativePath, self::FACTORY_ROOT);
+    }
+
+    private function isDatabaseFile(string $relativePath): bool
+    {
+        return str_starts_with($relativePath, self::DATABASE_ROOT);
+    }
+
+    /**
+     * Laravel 11+ password cast: 'password' => 'hashed' in casts() — not a secret.
+     */
+    private function isLaravelPasswordHashedCast(string $line): bool
+    {
+        return (bool) preg_match('/[\'"]password[\'"]\s*=>\s*[\'"]hashed[\'"]/i', $line);
     }
 }
