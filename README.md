@@ -8,35 +8,25 @@ php artisan checkpoint:scan
 
 ---
 
-## Framework support
-
-**Checkpoint** targets **Laravel 8 through Laravel 13** (via `illuminate/support` and `illuminate/console` 8.x–13.x). Install it on any app whose Laravel version matches that range.
-
-- The package itself requires **PHP 8.1+**. Newer Laravel releases may require a **higher** PHP version for your application (for example, Laravel 13 often ships with **PHP 8.3+** in practice). Your project’s `php` and `laravel/framework` constraints still apply on top of Checkpoint’s own requirements.
-
-**Recent changes (compatibility):** dependency constraints were widened so installation works across the full range above, including **Laravel 8** and **Laravel 13** (previously the README only mentioned Laravel 10–12, and the package did not list Laravel 8 or 13 explicitly).
-
----
-
 ## What it checks
 
-| # | Check | Severity |
-|---|-------|----------|
-| 1 | **Composer CVE Audit** — runs `composer audit` and reports known advisories | `FAIL` |
-| 2 | **NPM CVE Audit** — runs `npm audit` and flags critical/high vulnerabilities | `FAIL` / `WARN` |
-| 3 | **Environment Configuration** — `APP_DEBUG`, `APP_KEY`, `APP_URL`, `SESSION_SECURE_COOKIE` | `WARN` |
-| 4 | **`.gitignore` Sensitive Files** — ensures `.env`, `*.key`, `*.pem` are excluded; detects if `.env` is tracked by git | `FAIL` |
-| 5 | **File Permissions** — flags world-readable `.env` or world-writable `storage/` | `WARN` |
-| 6 | **Hardcoded Secrets** — scans PHP/JS files for API keys, Stripe tokens, AWS keys, GitHub PATs, PEM headers | `FAIL` |
-| 7 | **SQL Injection Risks** — detects raw queries with variable interpolation (`DB::select("… $var")`, `->whereRaw(…)`) | `FAIL` |
-| 8 | **Mass Assignment** — finds `$guarded = []`, `Model::unguard()`, or models with no fillable/guarded definition | `WARN` |
-| 9 | **XSS** — flags unescaped `{!! $var !!}` in Blade views and raw `echo` of request input | `WARN` |
-| 10 | **CSRF Protection** — detects forms with `POST`/`PUT`/`PATCH`/`DELETE` missing `@csrf`, and checks middleware is present | `FAIL` |
-| 11 | **Open Redirect** — spots `redirect($request->…)` or `header('Location: ' . $var)` with unvalidated input | `WARN` |
-| 12 | **Command Injection** — finds `exec`, `shell_exec`, `system`, `passthru`, `proc_open` called with unescaped variables | `FAIL` |
-| 13 | **Insecure Deserialization** — detects `unserialize($userInput)` and the classic `unserialize(base64_decode(…))` exploit chain | `FAIL` |
-| 14 | **Debug Functions in Production** — finds `var_dump`, `dd`, `dump`, `ray` left outside of test files | `WARN` |
-| 15 | **Sensitive Data Exposure** — flags `display_errors = 1`, logging of passwords/tokens, and Telescope always-on config | `WARN` |
+| #   | Check                                                                                                                          | Severity        |
+| --- | ------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| 1   | **Composer CVE Audit** — runs `composer audit` and reports known advisories                                                    | `FAIL`          |
+| 2   | **NPM CVE Audit** — runs `npm audit` and flags critical/high vulnerabilities                                                   | `FAIL` / `WARN` |
+| 3   | **Environment Configuration** — `APP_DEBUG`, `APP_KEY`, `APP_URL`, `SESSION_SECURE_COOKIE`                                     | `WARN`          |
+| 4   | **`.gitignore` Sensitive Files** — ensures `.env`, `*.key`, `*.pem` are excluded; detects if `.env` is tracked by git          | `FAIL`          |
+| 5   | **File Permissions** — flags world-readable `.env` or world-writable `storage/`                                                | `WARN`          |
+| 6   | **Hardcoded Secrets** — scans PHP/JS files for API keys, Stripe tokens, AWS keys, GitHub PATs, PEM headers                     | `FAIL`          |
+| 7   | **SQL Injection Risks** — detects raw queries with variable interpolation (`DB::select("… $var")`, `->whereRaw(…)`)            | `FAIL`          |
+| 8   | **Mass Assignment** — finds `$guarded = []`, `Model::unguard()`, or models with no fillable/guarded definition                 | `WARN`          |
+| 9   | **XSS** — flags unescaped `{!! $var !!}` in Blade views and raw `echo` of request input                                        | `WARN`          |
+| 10  | **CSRF Protection** — detects forms with `POST`/`PUT`/`PATCH`/`DELETE` missing `@csrf`, and checks middleware is present       | `FAIL`          |
+| 11  | **Open Redirect** — spots `redirect($request->…)` or `header('Location: ' . $var)` with unvalidated input                      | `WARN`          |
+| 12  | **Command Injection** — finds `exec`, `shell_exec`, `system`, `passthru`, `proc_open` called with unescaped variables          | `FAIL`          |
+| 13  | **Insecure Deserialization** — detects `unserialize($userInput)` and the classic `unserialize(base64_decode(…))` exploit chain | `FAIL`          |
+| 14  | **Debug Functions in Production** — finds `var_dump`, `dd`, `dump`, `ray` left outside of test files                           | `WARN`          |
+| 15  | **Sensitive Data Exposure** — flags `display_errors = 1`, logging of passwords/tokens, and Telescope always-on config          | `WARN`          |
 
 ---
 
@@ -170,10 +160,10 @@ $scanner = Scanner::withDefaultChecks(base_path())
 
 ### Exit codes
 
-| Code | Meaning |
-|------|---------|
-| `0` | All checks passed (or warnings only) |
-| `1` | At least one check returned `FAIL` |
+| Code | Meaning                              |
+| ---- | ------------------------------------ |
+| `0`  | All checks passed (or warnings only) |
+| `1`  | At least one check returned `FAIL`   |
 
 ---
 
