@@ -4,6 +4,7 @@ namespace Checkpoint;
 
 use Checkpoint\Commands\GithubPipelineCommand;
 use Checkpoint\Commands\GitlabPipelineCommand;
+use Checkpoint\Commands\InstallHooksCommand;
 use Checkpoint\Commands\ScanCommand;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +22,7 @@ class CheckpointServiceProvider extends ServiceProvider
                 ScanCommand::class,
                 GithubPipelineCommand::class,
                 GitlabPipelineCommand::class,
+                InstallHooksCommand::class,
             ]);
 
             $this->publishes([

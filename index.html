@@ -6,7 +6,7 @@
   <title>Checkpoint — Laravel Security Scanner</title>
   <meta name="description" content="A Laravel security scanner that audits your application for common vulnerabilities — from known CVEs to hardcoded secrets — via a single Artisan command." />
   <meta property="og:title" content="Checkpoint — Laravel Security Scanner" />
-  <meta property="og:description" content="Audit your Laravel app for 15 vulnerability categories with a single Artisan command." />
+  <meta property="og:description" content="Audit your Laravel app for 20 vulnerability categories with a single Artisan command — including SSRF, supply-chain freshness, CORS, TLS verification." />
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -578,6 +578,7 @@
     <div class="nav-links">
       <a href="#checks">Checks</a>
       <a href="#install">Install</a>
+      <a href="#automate">Automate</a>
       <a href="#features">Features</a>
       <a href="https://github.com/andreapollastri/checkpoint" target="_blank" rel="noopener" class="btn-gh">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -598,7 +599,7 @@
     <h1>Secure your<br><span>Laravel app.</span></h1>
 
     <p class="hero-sub">
-      Audit your application for 15 vulnerability categories — from CVEs to hardcoded secrets — with a single Artisan command.
+      Audit your application for 20 vulnerability categories — from CVEs and hardcoded secrets to SSRF, CORS and supply-chain freshness — with a single Artisan command.
     </p>
 
     <div class="hero-actions">
@@ -639,7 +640,7 @@
         <div class="t-detail">⚑ APP_DEBUG is true — stack traces exposed to end users.</div>
         <br/>
         <div><span class="t-muted">  ─────────────────────────────────────────────────────</span></div>
-        <div>  <span class="t-summary">Summary</span>  <span class="t-pass">12 passed</span>  <span class="t-warn">2 warning(s)</span>  <span class="t-fail">1 failed</span>  <span class="t-muted">(15 checks total)</span></div>
+        <div>  <span class="t-summary">Summary</span>  <span class="t-pass">16 passed</span>  <span class="t-warn">3 warning(s)</span>  <span class="t-fail">1 failed</span>  <span class="t-muted">(20 checks total)</span></div>
         <br/>
         <div>  <span class="t-fail">Scan result: FAIL — fix the issues above before deploying.</span></div>
       </div>
@@ -650,7 +651,7 @@
   <div class="stats-bar">
     <div class="stats-inner">
       <div>
-        <div class="stat-num">15</div>
+        <div class="stat-num">20</div>
         <div class="stat-label">Security Checks</div>
       </div>
       <div>
@@ -671,8 +672,8 @@
   <!-- CHECKS -->
   <section id="checks">
     <div class="section-label">Vulnerability Coverage</div>
-    <h2 class="section-title">15 checks. Zero excuses.</h2>
-    <p class="section-sub">Every scan covers the OWASP Top 10 and Laravel-specific pitfalls automatically.</p>
+    <h2 class="section-title">20 checks. Zero excuses.</h2>
+    <p class="section-sub">Every scan covers the OWASP Top 10, Laravel-specific pitfalls, and modern supply-chain risk — automatically.</p>
 
     <div class="checks-grid">
 
@@ -811,6 +812,51 @@
         <span class="sev sev-warn">WARN</span>
       </div>
 
+      <div class="check-card">
+        <span class="check-num">16</span>
+        <div class="check-body">
+          <div class="check-name">SSRF Risks</div>
+          <div class="check-desc">Detects Http::get($request->…), Guzzle, cURL and file_get_contents called with user-controlled URLs.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">17</span>
+        <div class="check-body">
+          <div class="check-name">TLS Certificate Verification</div>
+          <div class="check-desc">Flags withoutVerifying(), 'verify' => false, CURLOPT_SSL_VERIFYPEER disabled and unsafe stream contexts.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">18</span>
+        <div class="check-body">
+          <div class="check-name">CORS Configuration</div>
+          <div class="check-desc">Catches allowed_origins ['*'] combined with supports_credentials => true and other unsafe defaults in config/cors.php.</div>
+        </div>
+        <span class="sev sev-fail">FAIL/WARN</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">19</span>
+        <div class="check-body">
+          <div class="check-name">Package Freshness</div>
+          <div class="check-desc">Fails the scan when Composer packages were published within the last 3 days — mitigation against supply-chain hijacks. Whitelist via config.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">20</span>
+        <div class="check-body">
+          <div class="check-name">Supply Chain Tooling</div>
+          <div class="check-desc">Warns if no npm install-time guard (Safe-Chain, Socket CLI) is on your PATH when package.json is present.</div>
+        </div>
+        <span class="sev sev-warn">WARN</span>
+      </div>
+
     </div>
   </section>
 
@@ -892,6 +938,91 @@
 
   <div class="divider"></div>
 
+  <!-- AUTOMATION -->
+  <section id="automate">
+    <div class="section-label">Automation</div>
+    <h2 class="section-title">Scaffold pipelines.<br>Hook every install.</h2>
+    <p class="section-sub">Three commands to wire Checkpoint into your CI/CD provider and your Composer lifecycle — no copy-pasting YAML, no manual setup.</p>
+
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon">⚙️</div>
+        <div class="feature-title">GitHub Actions</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Generates <code style="font-family:var(--mono);color:var(--accent)">.github/workflows/checkpoint.yml</code> — triggers on push to main/master and every pull request, with Composer caching baked in.</div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:github'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+          </div>
+          <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:github</span></pre>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🦊</div>
+        <div class="feature-title">GitLab CI</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Generates <code style="font-family:var(--mono);color:var(--accent)">.gitlab-ci.yml</code> — runs on merge requests and default-branch pushes via the <code style="font-family:var(--mono);color:var(--accent)">composer:2</code> image.</div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:gitlab'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+          </div>
+          <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:gitlab</span></pre>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🪝</div>
+        <div class="feature-title">Composer Hooks</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Append-only patch on <code style="font-family:var(--mono);color:var(--accent)">composer.json</code> — the scan runs after every <code style="font-family:var(--mono);color:var(--accent)">composer install</code> / <code style="font-family:var(--mono);color:var(--accent)">update</code>. Idempotent and removable.</div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:install-hooks'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+          </div>
+          <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:install-hooks</span></pre>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <div class="feature-title">Configurable Checks</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Publish <code style="font-family:var(--mono);color:var(--accent)">config/checkpoint.php</code> to toggle individual checks, set the Package Freshness window, or whitelist trusted vendors.</div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan vendor:publish --tag=checkpoint-config'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+          </div>
+          <pre><span class="cmd">php artisan</span> <span class="arg">vendor:publish</span> <span class="flag">--tag</span>=<span class="arg">checkpoint-config</span></pre>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <div class="feature-title">Safe-Chain (recommended)</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Pair Checkpoint with <a href="https://www.npmjs.com/package/@aikidosec/safe-chain" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">Safe-Chain</a> to intercept known-malicious npm packages <em>before</em> their install scripts run. Checkpoint's Supply Chain Tooling check verifies it's on your PATH.</div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('npm install -g @aikidosec/safe-chain && safe-chain setup'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+          </div>
+          <pre><span class="cmd">npm</span> install -g <span class="arg">@aikidosec/safe-chain</span>
+<span class="cmd">safe-chain</span> setup</pre>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <div class="feature-title">Package Freshness Gate</div>
+        <div class="feature-desc">Composer packages released within the last 3 days fail the scan — a deploy gate against ongoing supply-chain hijacks. The window and whitelist are fully configurable.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
   <!-- FEATURES -->
   <section id="features">
     <div class="section-label">Why Checkpoint</div>
@@ -942,7 +1073,7 @@
   <!-- FOOTER -->
   <footer>
     <div class="footer-copy">
-      &copy; 2024 <a href="https://andreapollastri.net" target="_blank" rel="noopener">Andrea Pollastri</a> — MIT License
+      &copy; 2024–2026 <a href="https://andreapollastri.net" target="_blank" rel="noopener">Andrea Pollastri</a> — MIT License
     </div>
     <div class="footer-links">
       <a href="https://github.com/andreapollastri/checkpoint" target="_blank" rel="noopener">GitHub</a>

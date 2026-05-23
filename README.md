@@ -248,6 +248,23 @@ If you prefer to wire Checkpoint into a pipeline you already maintain, just call
   run: php artisan checkpoint:scan --json | tee checkpoint-report.json
 ```
 
+### Composer hooks
+
+Run Checkpoint automatically after every `composer install` / `composer update`:
+
+```bash
+php artisan checkpoint:install-hooks
+```
+
+This appends `@php artisan checkpoint:scan` to `scripts.post-update-cmd` and `scripts.post-install-cmd` in your `composer.json`. The command:
+
+- Confirms interactively before touching `composer.json` (skip the prompt with `--no-interaction` for CI).
+- Is idempotent: re-running on an already-installed setup is a no-op.
+- Preserves any existing hooks (append-only); does **not** overwrite scripts owned by other tools.
+- Supports `--remove` to cleanly uninstall and `--force` to replace stale Checkpoint entries.
+
+> **Why only `post-*`, not `pre-*`?** Composer's `pre-update-cmd` fires *before* dependencies are resolved, so the scanner would only see the codebase pre-update — useless against a malicious package that's about to be installed. And on a fresh clone there is no `vendor/`, so `php artisan` does not exist yet and `pre-install-cmd` would crash. Real-time interception of malicious installs is the job of [Safe-Chain](#recommended-companion-tools).
+
 ### Exit codes
 
 | Code | Meaning                              |
@@ -266,7 +283,8 @@ src/
 ├── Commands/
 │   ├── ScanCommand.php             # php artisan checkpoint:scan
 │   ├── GithubPipelineCommand.php   # php artisan checkpoint:github
-│   └── GitlabPipelineCommand.php   # php artisan checkpoint:gitlab
+│   ├── GitlabPipelineCommand.php   # php artisan checkpoint:gitlab
+│   └── InstallHooksCommand.php     # php artisan checkpoint:install-hooks
 └── Checks/
     ├── AbstractCheck.php           # base class
     ├── CheckResult.php             # pass / warn / fail value object
