@@ -33,21 +33,44 @@ class Scanner
 
     public static function withDefaultChecks(string $basePath): static
     {
-        return (new static)
-            ->add(new Checks\ComposerAuditCheck($basePath))
-            ->add(new Checks\NpmAuditCheck($basePath))
-            ->add(new Checks\EnvironmentCheck($basePath))
-            ->add(new Checks\GitIgnoreCheck($basePath))
-            ->add(new Checks\FilePermissionsCheck($basePath))
-            ->add(new Checks\HardcodedSecretsCheck($basePath))
-            ->add(new Checks\SqlInjectionCheck($basePath))
-            ->add(new Checks\MassAssignmentCheck($basePath))
-            ->add(new Checks\XssCheck($basePath))
-            ->add(new Checks\CsrfCheck($basePath))
-            ->add(new Checks\OpenRedirectCheck($basePath))
-            ->add(new Checks\CommandInjectionCheck($basePath))
-            ->add(new Checks\InsecureDeserializationCheck($basePath))
-            ->add(new Checks\DebugFunctionsCheck($basePath))
-            ->add(new Checks\SensitiveExposureCheck($basePath));
+        $factories = [
+            Checks\ComposerAuditCheck::class => fn () => new Checks\ComposerAuditCheck($basePath),
+            Checks\NpmAuditCheck::class => fn () => new Checks\NpmAuditCheck($basePath),
+            Checks\EnvironmentCheck::class => fn () => new Checks\EnvironmentCheck($basePath),
+            Checks\GitIgnoreCheck::class => fn () => new Checks\GitIgnoreCheck($basePath),
+            Checks\FilePermissionsCheck::class => fn () => new Checks\FilePermissionsCheck($basePath),
+            Checks\HardcodedSecretsCheck::class => fn () => new Checks\HardcodedSecretsCheck($basePath),
+            Checks\SqlInjectionCheck::class => fn () => new Checks\SqlInjectionCheck($basePath),
+            Checks\MassAssignmentCheck::class => fn () => new Checks\MassAssignmentCheck($basePath),
+            Checks\XssCheck::class => fn () => new Checks\XssCheck($basePath),
+            Checks\CsrfCheck::class => fn () => new Checks\CsrfCheck($basePath),
+            Checks\OpenRedirectCheck::class => fn () => new Checks\OpenRedirectCheck($basePath),
+            Checks\CommandInjectionCheck::class => fn () => new Checks\CommandInjectionCheck($basePath),
+            Checks\InsecureDeserializationCheck::class => fn () => new Checks\InsecureDeserializationCheck($basePath),
+            Checks\DebugFunctionsCheck::class => fn () => new Checks\DebugFunctionsCheck($basePath),
+            Checks\SensitiveExposureCheck::class => fn () => new Checks\SensitiveExposureCheck($basePath),
+            Checks\SsrfCheck::class => fn () => new Checks\SsrfCheck($basePath),
+            Checks\TlsVerificationCheck::class => fn () => new Checks\TlsVerificationCheck($basePath),
+            Checks\CorsConfigCheck::class => fn () => new Checks\CorsConfigCheck($basePath),
+            Checks\PackageFreshnessCheck::class => fn () => new Checks\PackageFreshnessCheck(
+                $basePath,
+                (int) \config('checkpoint.package_freshness.minimum_age_days', 3),
+                (array) \config('checkpoint.package_freshness.whitelist', []),
+            ),
+            Checks\SupplyChainToolingCheck::class => fn () => new Checks\SupplyChainToolingCheck($basePath),
+        ];
+
+        $enabled = (array) \config('checkpoint.checks', []);
+        $scanner = new static;
+
+        foreach ($factories as $class => $factory) {
+            if (($enabled[$class] ?? true) === false) {
+                continue;
+            }
+
+            $scanner->add($factory());
+        }
+
+        return $scanner;
     }
 }

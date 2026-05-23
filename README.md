@@ -27,6 +27,11 @@ php artisan checkpoint:scan
 | 13  | **Insecure Deserialization** — detects `unserialize($userInput)` and the classic `unserialize(base64_decode(…))` exploit chain | `FAIL`          |
 | 14  | **Debug Functions in Production** — finds `var_dump`, `dd`, `dump`, `ray` left outside of test files                           | `WARN`          |
 | 15  | **Sensitive Data Exposure** — flags `display_errors = 1`, logging of passwords/tokens, and Telescope always-on config          | `WARN`          |
+| 16  | **SSRF Risks** — detects `Http::get($request->…)`, Guzzle/cURL/`file_get_contents` called with user-controlled URLs            | `FAIL`          |
+| 17  | **TLS Certificate Verification** — flags `withoutVerifying()`, `'verify' => false`, `CURLOPT_SSL_VERIFYPEER => false`          | `FAIL`          |
+| 18  | **CORS Configuration** — flags `allowed_origins => ['*']` combined with `supports_credentials => true` and other loose configs | `FAIL` / `WARN` |
+| 19  | **Package Freshness (Supply Chain)** — fails the scan if any Composer package was released within the last N days (default 3); whitelist via config | `FAIL`          |
+| 20  | **Supply Chain Tooling** — when `package.json` is present, warns if no npm install-time guard (Safe-Chain, Socket CLI) is on PATH            | `WARN`          |
 
 ---
 
@@ -44,6 +49,25 @@ composer require --dev andreapollastri/checkpoint
 ```
 
 The package auto-discovers itself via Laravel's package discovery — no manual registration needed.
+
+---
+
+## Recommended companion tools
+
+Checkpoint is a static scanner — it inspects your codebase but doesn't intercept package installs. To harden the npm install path against the next event-stream/ua-parser-js/chalk-style supply-chain attack, pair Checkpoint with a runtime guard:
+
+### Safe-Chain (recommended)
+
+[Safe-Chain](https://www.npmjs.com/package/@aikidosec/safe-chain) by Aikido is a free shell shim that blocks known-malicious npm packages **before** their install scripts run. Install it once, globally:
+
+```bash
+npm install -g @aikidosec/safe-chain
+safe-chain setup
+```
+
+Checkpoint's **Supply Chain Tooling** check verifies whether Safe-Chain (or an equivalent like Socket CLI) is on your `PATH` and emits a `WARN` if no protection is present.
+
+> Why Checkpoint doesn't install it for you: Safe-Chain works as a global shell shim, not a project dependency. A `composer require` should never invoke another ecosystem's package manager (and can't reliably do so on hosts without Node). Installing it explicitly keeps the install path auditable.
 
 ---
 
@@ -74,6 +98,52 @@ php artisan checkpoint:scan --json
 ```
 
 The command exits with code `1` if any check returns `FAIL`, making it suitable as a pipeline gate.
+
+---
+
+## Configuration
+
+Checkpoint works out of the box with sensible defaults. Publish the config file when you need to toggle individual checks or tune the freshness gate:
+
+```bash
+php artisan vendor:publish --tag=checkpoint-config
+```
+
+This creates `config/checkpoint.php` with two sections:
+
+### Enabling / disabling checks
+
+Every default check is listed and enabled. Set any entry to `false` to exclude it from the scan:
+
+```php
+'checks' => [
+    Checks\ComposerAuditCheck::class      => true,
+    Checks\NpmAuditCheck::class           => false, // skip npm audit on a PHP-only project
+    Checks\EnvironmentCheck::class        => true,
+    // …
+    Checks\PackageFreshnessCheck::class   => true,
+    Checks\SupplyChainToolingCheck::class => true,
+],
+```
+
+> Checks not listed in the map fall back to **enabled**. When you upgrade Checkpoint and new checks are added, you keep the protection without re-publishing the config — re-publish only when you want to see the full updated list.
+
+### Package Freshness tuning
+
+```php
+'package_freshness' => [
+    'minimum_age_days' => 3,
+    'whitelist' => [
+        // 'laravel/framework',
+        // 'symfony/console',
+    ],
+],
+```
+
+- `minimum_age_days` — packages released more recently than this fail the scan. Default `3`.
+- `whitelist` — fully-qualified package names (`vendor/package`) exempt from the freshness check. Use sparingly and ideally with an inline comment explaining why each entry is allowed.
+
+> The `--only` / `--skip` CLI flags still work and override the config for the current run, which is handy for ad-hoc scans without editing the config.
 
 ---
 
@@ -151,7 +221,27 @@ $scanner = Scanner::withDefaultChecks(base_path())
 
 ## CI/CD integration
 
+Checkpoint can scaffold a ready-to-use pipeline for either provider in one command.
+
 ### GitHub Actions
+
+```bash
+php artisan checkpoint:github
+```
+
+Creates `.github/workflows/checkpoint.yml` — triggers on push to `main`/`master` and on every pull request. Uses `actions/checkout@v4`, `shivammathur/setup-php@v2` (PHP 8.2), Composer cache, and runs `php artisan checkpoint:scan`. Pass `--force` to overwrite an existing file.
+
+### GitLab CI
+
+```bash
+php artisan checkpoint:gitlab
+```
+
+Creates `.gitlab-ci.yml` — runs on merge requests and default-branch pushes using the `composer:2` image with a Composer cache. If you already have a `.gitlab-ci.yml`, the command refuses to overwrite and prints the snippet to stdout so you can paste it into your existing pipeline. Use `--force` to overwrite.
+
+### Custom usage
+
+If you prefer to wire Checkpoint into a pipeline you already maintain, just call:
 
 ```yaml
 - name: Security audit
@@ -174,7 +264,9 @@ src/
 ├── CheckpointServiceProvider.php   # auto-registers the command
 ├── Scanner.php                     # orchestrates all checks
 ├── Commands/
-│   └── ScanCommand.php             # php artisan checkpoint:scan
+│   ├── ScanCommand.php             # php artisan checkpoint:scan
+│   ├── GithubPipelineCommand.php   # php artisan checkpoint:github
+│   └── GitlabPipelineCommand.php   # php artisan checkpoint:gitlab
 └── Checks/
     ├── AbstractCheck.php           # base class
     ├── CheckResult.php             # pass / warn / fail value object
@@ -192,7 +284,12 @@ src/
     ├── CommandInjectionCheck.php
     ├── InsecureDeserializationCheck.php
     ├── DebugFunctionsCheck.php
-    └── SensitiveExposureCheck.php
+    ├── SensitiveExposureCheck.php
+    ├── SsrfCheck.php
+    ├── TlsVerificationCheck.php
+    ├── CorsConfigCheck.php
+    ├── PackageFreshnessCheck.php
+    └── SupplyChainToolingCheck.php
 ```
 
 ---

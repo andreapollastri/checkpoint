@@ -1,0 +1,66 @@
+<?php
+
+use Checkpoint\Checks;
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Enabled Checks
+    |--------------------------------------------------------------------------
+    |
+    | Every default check is listed here and enabled by default. Set any
+    | entry to `false` to exclude it from `php artisan checkpoint:scan`.
+    |
+    | Checks not listed in this map fall back to enabled — so when you
+    | upgrade Checkpoint and new checks are added, you keep the protection
+    | without re-publishing this file.
+    |
+    */
+
+    'checks' => [
+        Checks\ComposerAuditCheck::class => true,
+        Checks\NpmAuditCheck::class => true,
+        Checks\EnvironmentCheck::class => true,
+        Checks\GitIgnoreCheck::class => true,
+        Checks\FilePermissionsCheck::class => true,
+        Checks\HardcodedSecretsCheck::class => true,
+        Checks\SqlInjectionCheck::class => true,
+        Checks\MassAssignmentCheck::class => true,
+        Checks\XssCheck::class => true,
+        Checks\CsrfCheck::class => true,
+        Checks\OpenRedirectCheck::class => true,
+        Checks\CommandInjectionCheck::class => true,
+        Checks\InsecureDeserializationCheck::class => true,
+        Checks\DebugFunctionsCheck::class => true,
+        Checks\SensitiveExposureCheck::class => true,
+        Checks\SsrfCheck::class => true,
+        Checks\TlsVerificationCheck::class => true,
+        Checks\CorsConfigCheck::class => true,
+        Checks\PackageFreshnessCheck::class => true,
+        Checks\SupplyChainToolingCheck::class => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Package Freshness (Supply Chain)
+    |--------------------------------------------------------------------------
+    |
+    | Composer packages released within `minimum_age_days` will fail the
+    | "Package Freshness" check. This mitigates supply-chain attacks that
+    | typically get caught and removed from Packagist within hours or days.
+    |
+    | Add fully-qualified package names to `whitelist` to bypass the age
+    | check for specific dependencies (e.g. a critical security patch you
+    | need to deploy before the freshness window expires).
+    |
+    */
+
+    'package_freshness' => [
+        'minimum_age_days' => 3,
+        'whitelist' => [
+            // 'vendor/package',
+        ],
+    ],
+
+];
