@@ -38,6 +38,10 @@ class InsecureDeserializationCheck extends AbstractCheck
             foreach ($lines as $i => $line) {
                 // unserialize() with a variable argument that is not a fixed internal value
                 if (preg_match('/\bunserialize\s*\(\s*\$(?!this)[a-zA-Z_]/', $line)) {
+                    if ($this->usesAllowedClassesRestriction($line)) {
+                        continue;
+                    }
+
                     $findings[] = "{$relative}:".($i + 1).' — unserialize() with dynamic input: '.mb_strimwidth(trim($line), 0, 100, '…');
                 }
 
@@ -53,5 +57,10 @@ class InsecureDeserializationCheck extends AbstractCheck
         }
 
         return CheckResult::fail(count($findings).' insecure deserialization risk(s) found.', $findings);
+    }
+
+    private function usesAllowedClassesRestriction(string $line): bool
+    {
+        return (bool) preg_match('/allowed_classes\s*=>/i', $line);
     }
 }

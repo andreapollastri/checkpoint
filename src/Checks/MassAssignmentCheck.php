@@ -50,8 +50,8 @@ class MassAssignmentCheck extends AbstractCheck
             }
 
             // Neither $fillable nor $guarded defined
-            $hasFillable = (bool) preg_match('/\$fillable\s*=/', $content);
-            $hasGuarded = (bool) preg_match('/\$guarded\s*=/', $content);
+            $hasFillable = (bool) preg_match('/(?:\$fillable\s*=|#\[Fillable\b)/', $content);
+            $hasGuarded = (bool) preg_match('/(?:\$guarded\s*=|#\[Guarded\b)/', $content);
 
             if (! $hasFillable && ! $hasGuarded) {
                 $findings[] = "{$relative}: Model has neither \$fillable nor \$guarded — all attributes are unprotected.";

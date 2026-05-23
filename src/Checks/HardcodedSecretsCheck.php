@@ -188,6 +188,10 @@ class HardcodedSecretsCheck extends AbstractCheck
                         $isSafe = true;
                     }
 
+                    if (! $isSafe && $this->isValidationRule($line)) {
+                        $isSafe = true;
+                    }
+
                     if (! $isSafe) {
                         $entry = "{$relative}:".($i + 1).' — '.mb_strimwidth($trimmed, 0, 120, '…');
                         if ($isFactory) {
@@ -251,5 +255,13 @@ class HardcodedSecretsCheck extends AbstractCheck
     private function isLaravelPasswordHashedCast(string $line): bool
     {
         return (bool) preg_match('/[\'"]password[\'"]\s*=>\s*[\'"]hashed[\'"]/i', $line);
+    }
+
+    private function isValidationRule(string $line): bool
+    {
+        return (bool) preg_match(
+            '/=>\s*["\'](?:required|nullable|sometimes|present|prohibited|accepted|email|string|integer|numeric|uuid|url|json|file|image|confirmed|min:|max:|regex:|in:|not_in:|unique:|exists:)[^"\']*["\']/i',
+            $line
+        );
     }
 }
