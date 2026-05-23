@@ -61,6 +61,6 @@ class InsecureDeserializationCheck extends AbstractCheck
 
     private function usesAllowedClassesRestriction(string $line): bool
     {
-        return (bool) preg_match('/allowed_classes\s*=>/i', $line);
+        return (bool) preg_match('/allowed_classes["\']?\s*=>/i', $line);
     }
 }
