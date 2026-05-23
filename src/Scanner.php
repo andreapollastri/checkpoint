@@ -58,6 +58,11 @@ class Scanner
                 (array) \config('checkpoint.package_freshness.whitelist', []),
             ),
             Checks\SupplyChainToolingCheck::class => fn () => new Checks\SupplyChainToolingCheck($basePath),
+            Checks\PathTraversalCheck::class => fn () => new Checks\PathTraversalCheck($basePath),
+            Checks\WeakCryptographyCheck::class => fn () => new Checks\WeakCryptographyCheck($basePath),
+            Checks\InsecureRngCheck::class => fn () => new Checks\InsecureRngCheck($basePath),
+            Checks\SessionSecurityCheck::class => fn () => new Checks\SessionSecurityCheck($basePath),
+            Checks\EolVersionCheck::class => fn () => new Checks\EolVersionCheck($basePath),
         ];
 
         $enabled = (array) \config('checkpoint.checks', []);

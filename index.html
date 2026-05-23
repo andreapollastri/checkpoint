@@ -6,7 +6,7 @@
   <title>Checkpoint — Laravel Security Scanner</title>
   <meta name="description" content="A Laravel security scanner that audits your application for common vulnerabilities — from known CVEs to hardcoded secrets — via a single Artisan command." />
   <meta property="og:title" content="Checkpoint — Laravel Security Scanner" />
-  <meta property="og:description" content="Audit your Laravel app for 20 vulnerability categories with a single Artisan command — including SSRF, supply-chain freshness, CORS, TLS verification." />
+  <meta property="og:description" content="Audit your Laravel app for 25 vulnerability categories with a single Artisan command — including SSRF, path traversal, weak crypto, supply-chain freshness, CORS, TLS verification." />
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -599,7 +599,7 @@
     <h1>Secure your<br><span>Laravel app.</span></h1>
 
     <p class="hero-sub">
-      Audit your application for 20 vulnerability categories — from CVEs and hardcoded secrets to SSRF, CORS and supply-chain freshness — with a single Artisan command.
+      Audit your application for 25 vulnerability categories — from CVEs and hardcoded secrets to SSRF, path traversal, weak crypto and supply-chain freshness — with a single Artisan command.
     </p>
 
     <div class="hero-actions">
@@ -633,14 +633,17 @@
         <div><span class="t-muted">        No known CVEs in Composer dependencies.</span></div>
         <br/>
         <div><span class="t-fail">  FAIL</span>  <span class="t-cmd">Hardcoded Secrets</span></div>
-        <div class="t-detail">✗ app/Services/PaymentService.php:14 — 'api_key' =&gt; 'sk_live_abc123…'</div>
-        <div class="t-detail">✗ config/services.php:8 — $secret = 'supersecretvalue'</div>
+        <div class="t-detail">✗ app/Services/PaymentService.php:14 — 'api_key' =&gt; 'sk_live_abc123…' <span style="color:var(--blue)">[a1b2c3d4e5f6]</span></div>
+        <div class="t-detail">✗ config/services.php:8 — $secret = 'supersecretvalue' <span style="color:var(--blue)">[9f8e7d6c5b4a]</span></div>
+        <br/>
+        <div><span class="t-fail">  FAIL</span>  <span class="t-cmd">Path Traversal Risks</span></div>
+        <div class="t-detail">✗ app/Http/Controllers/DownloadController.php:24 — Storage::get($request-&gt;path) <span style="color:var(--blue)">[7b6a5f4e3d2c]</span></div>
         <br/>
         <div><span class="t-warn">  WARN</span>  <span class="t-cmd">Environment Configuration</span></div>
-        <div class="t-detail">⚑ APP_DEBUG is true — stack traces exposed to end users.</div>
+        <div class="t-detail">⚑ APP_DEBUG is true — stack traces exposed to end users. <span style="color:var(--blue)">[5c4b3a2d1e0f]</span></div>
         <br/>
         <div><span class="t-muted">  ─────────────────────────────────────────────────────</span></div>
-        <div>  <span class="t-summary">Summary</span>  <span class="t-pass">16 passed</span>  <span class="t-warn">3 warning(s)</span>  <span class="t-fail">1 failed</span>  <span class="t-muted">(20 checks total)</span></div>
+        <div>  <span class="t-summary">Summary</span>  <span class="t-pass">19 passed</span>  <span class="t-warn">4 warning(s)</span>  <span class="t-fail">2 failed</span>  <span class="t-muted">(25 checks total)</span></div>
         <br/>
         <div>  <span class="t-fail">Scan result: FAIL — fix the issues above before deploying.</span></div>
       </div>
@@ -651,7 +654,7 @@
   <div class="stats-bar">
     <div class="stats-inner">
       <div>
-        <div class="stat-num">20</div>
+        <div class="stat-num">25</div>
         <div class="stat-label">Security Checks</div>
       </div>
       <div>
@@ -672,7 +675,7 @@
   <!-- CHECKS -->
   <section id="checks">
     <div class="section-label">Vulnerability Coverage</div>
-    <h2 class="section-title">20 checks. Zero excuses.</h2>
+    <h2 class="section-title">25 checks. Zero excuses.</h2>
     <p class="section-sub">Every scan covers the OWASP Top 10, Laravel-specific pitfalls, and modern supply-chain risk — automatically.</p>
 
     <div class="checks-grid">
@@ -857,6 +860,51 @@
         <span class="sev sev-warn">WARN</span>
       </div>
 
+      <div class="check-card">
+        <span class="check-num">21</span>
+        <div class="check-body">
+          <div class="check-name">Path Traversal</div>
+          <div class="check-desc">Detects Storage::get($request->…), file_get_contents, include and require with user-controlled paths.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">22</span>
+        <div class="check-body">
+          <div class="check-name">Weak Cryptography</div>
+          <div class="check-desc">Flags mcrypt_*, ECB cipher mode, DES/3DES/RC4, and md5/sha1 used near password, token or HMAC keywords.</div>
+        </div>
+        <span class="sev sev-fail">FAIL/WARN</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">23</span>
+        <div class="check-body">
+          <div class="check-name">Insecure RNG</div>
+          <div class="check-desc">Detects rand, mt_rand and uniqid used for tokens, CSRF, password reset, or OTP — use random_bytes / Str::random instead.</div>
+        </div>
+        <span class="sev sev-fail">FAIL</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">24</span>
+        <div class="check-body">
+          <div class="check-name">Session &amp; Cookie Security</div>
+          <div class="check-desc">Audits config/session.php for http_only=false, same_site=null/none, secure=false and encrypt=false.</div>
+        </div>
+        <span class="sev sev-warn">WARN</span>
+      </div>
+
+      <div class="check-card">
+        <span class="check-num">25</span>
+        <div class="check-body">
+          <div class="check-name">EOL Versions</div>
+          <div class="check-desc">Fails the scan when Laravel or PHP have left their upstream security-support window — keep dependencies inside the patch lifecycle.</div>
+        </div>
+        <span class="sev sev-fail">FAIL/WARN</span>
+      </div>
+
     </div>
   </section>
 
@@ -1016,6 +1064,12 @@
         <div class="feature-icon">📦</div>
         <div class="feature-title">Package Freshness Gate</div>
         <div class="feature-desc">Composer packages released within the last 3 days fail the scan — a deploy gate against ongoing supply-chain hijacks. The window and whitelist are fully configurable.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🤫</div>
+        <div class="feature-title">Per-Finding Suppression</div>
+        <div class="feature-desc">Every FAIL/WARN gets a stable 12-char hash <code style="font-family:var(--mono);color:var(--accent)">[a1b2c3d4e5f6]</code>. Drop the hash into <code style="font-family:var(--mono);color:var(--accent)">config/checkpoint.php</code> → <code style="font-family:var(--mono);color:var(--accent)">suppressed</code> to silence false positives. Hashes are content-stable across line-shifting refactors.</div>
       </div>
 
     </div>

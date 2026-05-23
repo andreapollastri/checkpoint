@@ -39,6 +39,11 @@ return [
         Checks\CorsConfigCheck::class => true,
         Checks\PackageFreshnessCheck::class => true,
         Checks\SupplyChainToolingCheck::class => true,
+        Checks\PathTraversalCheck::class => true,
+        Checks\WeakCryptographyCheck::class => true,
+        Checks\InsecureRngCheck::class => true,
+        Checks\SessionSecurityCheck::class => true,
+        Checks\EolVersionCheck::class => true,
     ],
 
     /*
@@ -59,6 +64,9 @@ return [
     'package_freshness' => [
         'minimum_age_days' => 3,
         'whitelist' => [
+            // Checkpoint exempts itself from the freshness gate so a fresh
+            // release of the scanner cannot block its own user's deploy.
+            'andreapollastri/checkpoint',
             // 'vendor/package',
         ],
     ],

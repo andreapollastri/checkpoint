@@ -32,6 +32,11 @@ php artisan checkpoint:scan
 | 18  | **CORS Configuration** — flags `allowed_origins => ['*']` combined with `supports_credentials => true` and other loose configs | `FAIL` / `WARN` |
 | 19  | **Package Freshness (Supply Chain)** — fails the scan if any Composer package was released within the last N days (default 3); whitelist via config | `FAIL`          |
 | 20  | **Supply Chain Tooling** — when `package.json` is present, warns if no npm install-time guard (Safe-Chain, Socket CLI) is on PATH            | `WARN`          |
+| 21  | **Path Traversal Risks** — detects `Storage::get($request->…)`, `file_get_contents`/`include`/`require` with user-controlled paths           | `FAIL`          |
+| 22  | **Weak Cryptography** — flags `mcrypt_*`, ECB mode, DES/3DES/RC4, and `md5`/`sha1` used near password/token/HMAC keywords                    | `FAIL` / `WARN` |
+| 23  | **Insecure RNG** — detects `rand`/`mt_rand`/`uniqid` used in security contexts (tokens, CSRF, password reset, OTP)                           | `FAIL`          |
+| 24  | **Session & Cookie Security** — audits `config/session.php` for `http_only=false`, `same_site=null/none`, `secure=false`, `encrypt=false`    | `WARN`          |
+| 25  | **EOL Versions** — flags Composer-locked Laravel and the running PHP when they are past or approaching upstream security cutoff              | `FAIL` / `WARN` |
 
 ---
 
@@ -134,6 +139,7 @@ Every default check is listed and enabled. Set any entry to `false` to exclude i
 'package_freshness' => [
     'minimum_age_days' => 3,
     'whitelist' => [
+        'andreapollastri/checkpoint', // bundled — see note below
         // 'laravel/framework',
         // 'symfony/console',
     ],
@@ -142,6 +148,8 @@ Every default check is listed and enabled. Set any entry to `false` to exclude i
 
 - `minimum_age_days` — packages released more recently than this fail the scan. Default `3`.
 - `whitelist` — fully-qualified package names (`vendor/package`) exempt from the freshness check. Use sparingly and ideally with an inline comment explaining why each entry is allowed.
+
+> Checkpoint ships with `andreapollastri/checkpoint` already whitelisted by default — a fresh release of the scanner itself should never block its own user's deploy. Remove the entry if you want to gate even Checkpoint upgrades through the freshness window.
 
 ### Suppressing individual findings
 
@@ -189,18 +197,22 @@ The hash is content-stable: refactors that only shift line numbers within the sa
 
   FAIL  Hardcoded Secrets
         3 potential hardcoded secret(s) found.
-          ✗ app/Services/PaymentService.php:14 — 'api_key' => 'sk_live_abc123…'
-          ✗ config/services.php:8 — $secret = 'supersecretvalue'
-          ✗ app/Http/Controllers/WebhookController.php:31 — 'api_key' => 'ghp_…'
+          ✗ app/Services/PaymentService.php:14 — 'api_key' => 'sk_live_abc123…' [a1b2c3d4e5f6]
+          ✗ config/services.php:8 — $secret = 'supersecretvalue'             [9f8e7d6c5b4a]
+          ✗ app/Http/Controllers/WebhookController.php:31 — 'api_key' => 'ghp_…' [3e2d1c0b9a8f]
+
+  FAIL  Path Traversal Risks
+        1 potential path traversal risk(s) found.
+          ✗ app/Http/Controllers/DownloadController.php:24 — Storage::get($request->path) [7b6a5f4e3d2c]
 
   WARN  Environment Configuration
         3 environment issue(s) found.
-          ⚑ APP_DEBUG is true — full stack traces will be exposed to end users.
-          ⚑ SESSION_SECURE_COOKIE is not enabled.
-          ⚑ APP_URL is set to "http://localhost" — update it for production.
+          ⚑ APP_DEBUG is true — full stack traces will be exposed to end users. [5c4b3a2d1e0f]
+          ⚑ SESSION_SECURE_COOKIE is not enabled.                               [1a2b3c4d5e6f]
+          ⚑ APP_URL is set to "http://localhost" — update it for production.    [6e5d4c3b2a1f]
 
   ─────────────────────────────────────────────────────────
-  Summary  12 passed  2 warning(s)  1 failed  (15 checks total)
+  Summary  19 passed  4 warning(s)  2 failed  (25 checks total)
 
   Scan result: FAIL — fix the issues above before deploying.
 ```
@@ -331,7 +343,12 @@ src/
     ├── TlsVerificationCheck.php
     ├── CorsConfigCheck.php
     ├── PackageFreshnessCheck.php
-    └── SupplyChainToolingCheck.php
+    ├── SupplyChainToolingCheck.php
+    ├── PathTraversalCheck.php
+    ├── WeakCryptographyCheck.php
+    ├── InsecureRngCheck.php
+    ├── SessionSecurityCheck.php
+    └── EolVersionCheck.php
 ```
 
 ---
