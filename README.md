@@ -143,6 +143,30 @@ Every default check is listed and enabled. Set any entry to `false` to exclude i
 - `minimum_age_days` — packages released more recently than this fail the scan. Default `3`.
 - `whitelist` — fully-qualified package names (`vendor/package`) exempt from the freshness check. Use sparingly and ideally with an inline comment explaining why each entry is allowed.
 
+### Suppressing individual findings
+
+Every `WARN` or `FAIL` finding is shown with a stable 12-character hash:
+
+```
+FAIL  Hardcoded Secrets
+      3 potential hardcoded secret(s) found.
+        ✗ app/Services/PaymentService.php:14 — 'api_key' => 'sk_live_…' [a1b2c3d4e5f6]
+        ✗ config/services.php:8 — $secret = 'super…'                    [9f8e7d6c5b4a]
+```
+
+To silence one — false positive, accepted legacy code, internal test fixture — copy the bracketed hash into `config/checkpoint.php`:
+
+```php
+'suppressed' => [
+    'a1b2c3d4e5f6',
+    '9f8e7d6c5b4a',
+],
+```
+
+On the next run those findings are filtered out. If every finding of a given check ends up suppressed, the check is downgraded to `PASS` with an explicit `"All N finding(s) suppressed via config."` message — so the suppression is visible in the output, not silently ignored.
+
+The hash is content-stable: refactors that only shift line numbers within the same file will **not** invalidate the suppression. The hash *does* change if you alter the file path or the finding content itself, which is the intended safety net.
+
 > The `--only` / `--skip` CLI flags still work and override the config for the current run, which is handy for ad-hoc scans without editing the config.
 
 ---

@@ -63,4 +63,28 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Suppressed Findings
+    |--------------------------------------------------------------------------
+    |
+    | Add 12-character finding hashes here to silence specific FAIL/WARN
+    | issues you have intentionally accepted (false positive, legacy code,
+    | etc.). Hashes are shown next to each finding when you run the scan,
+    | e.g.:
+    |
+    |   ✗ app/Services/Foo.php:14 — 'api_key' => 'sk_…' [a1b2c3d4e5f6]
+    |
+    | Copy the bracketed value into this array. The hash is content-stable:
+    | refactors that only shift line numbers will not invalidate it.
+    |
+    | If every finding of a check is suppressed, the check is downgraded to
+    | PASS with an explicit "N suppressed" message.
+    |
+    */
+
+    'suppressed' => [
+        // 'a1b2c3d4e5f6',
+    ],
+
 ];
