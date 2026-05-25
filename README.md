@@ -19,13 +19,13 @@ php artisan checkpoint:scan
 | 5   | **File Permissions** — flags world-readable `.env` or world-writable `storage/`                                                | `WARN`          |
 | 6   | **Hardcoded Secrets** — scans PHP/JS files for API keys, Stripe tokens, AWS keys, GitHub PATs, PEM headers                     | `FAIL`          |
 | 7   | **SQL Injection Risks** — detects raw queries with variable interpolation (`DB::select("… $var")`, `->whereRaw(…)`)            | `FAIL`          |
-| 8   | **Mass Assignment** — finds `$guarded = []`, `Model::unguard()`, or models with no fillable/guarded definition                 | `WARN`          |
-| 9   | **XSS** — flags unescaped `{!! $var !!}` in Blade views and raw `echo` of request input                                        | `WARN`          |
+| 8   | **Mass Assignment Vulnerabilities** — finds `$guarded = []`, `Model::unguard()`, or models with no fillable/guarded definition                 | `WARN`          |
+| 9   | **XSS (Cross-Site Scripting) Risks** — flags unescaped `{!! $var !!}` in Blade views and raw `echo` of request input                                        | `WARN`          |
 | 10  | **CSRF Protection** — detects forms with `POST`/`PUT`/`PATCH`/`DELETE` missing `@csrf`, and checks middleware is present       | `FAIL`          |
-| 11  | **Open Redirect** — spots `redirect($request->…)` or `header('Location: ' . $var)` with unvalidated input                      | `WARN`          |
-| 12  | **Command Injection** — finds `exec`, `shell_exec`, `system`, `passthru`, `proc_open` called with unescaped variables          | `FAIL`          |
+| 11  | **Open Redirect Risks** — spots `redirect($request->…)` or `header('Location: ' . $var)` with unvalidated input                      | `WARN`          |
+| 12  | **Command Injection Risks** — finds `exec`, `shell_exec`, `system`, `passthru`, `proc_open` called with unescaped variables          | `FAIL`          |
 | 13  | **Insecure Deserialization** — detects `unserialize($userInput)` and the classic `unserialize(base64_decode(…))` exploit chain | `FAIL`          |
-| 14  | **Debug Functions in Production** — finds `var_dump`, `dd`, `dump`, `ray` left outside of test files                           | `WARN`          |
+| 14  | **Debug Functions in Production Code** — finds `var_dump`, `dd`, `dump`, `ray` left outside of test files                           | `WARN`          |
 | 15  | **Sensitive Data Exposure** — flags `display_errors = 1`, logging of passwords/tokens, and Telescope always-on config          | `WARN`          |
 | 16  | **SSRF Risks** — detects `Http::get($request->…)`, Guzzle/cURL/`file_get_contents` called with user-controlled URLs            | `FAIL`          |
 | 17  | **TLS Certificate Verification** — flags `withoutVerifying()`, `'verify' => false`, `CURLOPT_SSL_VERIFYPEER => false`          | `FAIL`          |
