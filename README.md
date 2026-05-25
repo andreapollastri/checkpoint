@@ -37,6 +37,7 @@ php artisan checkpoint:scan
 | 23  | **Insecure RNG** — detects `rand`/`mt_rand`/`uniqid` used in security contexts (tokens, CSRF, password reset, OTP)                           | `FAIL`          |
 | 24  | **Session & Cookie Security** — audits `config/session.php` for `http_only=false`, `same_site=null/none`, `secure=false`, `encrypt=false`    | `WARN`          |
 | 25  | **EOL Versions** — flags Composer-locked Laravel and the running PHP when they are past or approaching upstream security cutoff              | `FAIL` / `WARN` |
+| 26  | **Suspicious Vendor Autoload** — flags packages under `vendor/` that register PHP via `autoload.files` outside a baked-in whitelist (the mechanism abused by the May 2026 Laravel-Lang supply-chain attack) | `WARN`          |
 
 ---
 
@@ -59,7 +60,24 @@ The package auto-discovers itself via Laravel's package discovery — no manual 
 
 ## Recommended companion tools
 
-Checkpoint is a static scanner — it inspects your codebase but doesn't intercept package installs. To harden the npm install path against the next event-stream/ua-parser-js/chalk-style supply-chain attack, pair Checkpoint with a runtime guard:
+Checkpoint is a static scanner — it inspects your codebase but doesn't intercept package installs. To harden the npm install path against the next event-stream/ua-parser-js/chalk-style supply-chain attack, pair Checkpoint with **defense in depth**: run installs inside containers and add a runtime guard on the host when you must install locally.
+
+### Docker (recommended)
+
+Run `composer install`, `npm install`, and `php artisan checkpoint:scan` **inside a container**, not directly on your laptop or server shell. Supply-chain malware often executes during a package's post-install script — if that runs on your host, it has access to your SSH keys, browser cookies, and filesystem. A disposable dev container limits blast radius to an isolated filesystem that you can throw away.
+
+Typical workflow:
+
+```bash
+docker compose up -d
+docker compose exec app composer install
+docker compose exec app npm install
+docker compose exec app php artisan checkpoint:scan
+```
+
+Use whatever Docker setup fits your project — Docker Compose, a devcontainer, or a CI image such as `composer:2` with Node in the same job. The goal is the same: **never let untrusted install scripts run on bare metal**; treat the host as a control plane only.
+
+> Checkpoint's CI scaffolds ([GitHub Actions](#github-actions), [GitLab CI](#gitlab-ci)) already run the scan inside ephemeral containers. Mirror that pattern locally.
 
 ### Safe-Chain (recommended)
 
@@ -70,9 +88,9 @@ npm install -g @aikidosec/safe-chain
 safe-chain setup
 ```
 
-Checkpoint's **Supply Chain Tooling** check verifies whether Safe-Chain (or an equivalent like Socket CLI) is on your `PATH` and emits a `WARN` if no protection is present.
+When you **do** run npm on the host (CI runners, one-off scripts), Safe-Chain blocks known-malicious packages **before** their install scripts run. Checkpoint's **Supply Chain Tooling** check verifies whether Safe-Chain (or an equivalent like Socket CLI) is on your `PATH` and emits a `WARN` if no protection is present.
 
-> Why Checkpoint doesn't install it for you: Safe-Chain works as a global shell shim, not a project dependency. A `composer require` should never invoke another ecosystem's package manager (and can't reliably do so on hosts without Node). Installing it explicitly keeps the install path auditable.
+> Why Checkpoint doesn't install it for you: Safe-Chain works as a global shell shim, not a project dependency. A `composer require` should never invoke another ecosystem's package manager (and can't reliably do so on hosts without Node). Installing it explicitly keeps the install path auditable. Prefer Docker for day-to-day installs; keep Safe-Chain as a safety net where containers aren't practical.
 
 ---
 
@@ -146,7 +164,7 @@ Every default check is listed and enabled. Set any entry to `false` to exclude i
 ],
 ```
 
-- `minimum_age_days` — packages released more recently than this fail the scan. Default `3`.
+- `minimum_age_days` — packages released more recently than this fail the scan. Default `3`. **Set to `0` to bypass the freshness gate entirely** without removing the check from the scanner.
 - `whitelist` — fully-qualified package names (`vendor/package`) exempt from the freshness check. Use sparingly and ideally with an inline comment explaining why each entry is allowed.
 
 > Checkpoint ships with `andreapollastri/checkpoint` already whitelisted by default — a fresh release of the scanner itself should never block its own user's deploy. Remove the entry if you want to gate even Checkpoint upgrades through the freshness window.
@@ -299,7 +317,7 @@ This appends `@php artisan checkpoint:scan` to `scripts.post-update-cmd` and `sc
 - Preserves any existing hooks (append-only); does **not** overwrite scripts owned by other tools.
 - Supports `--remove` to cleanly uninstall and `--force` to replace stale Checkpoint entries.
 
-> **Why only `post-*`, not `pre-*`?** Composer's `pre-update-cmd` fires *before* dependencies are resolved, so the scanner would only see the codebase pre-update — useless against a malicious package that's about to be installed. And on a fresh clone there is no `vendor/`, so `php artisan` does not exist yet and `pre-install-cmd` would crash. Real-time interception of malicious installs is the job of [Safe-Chain](#recommended-companion-tools).
+> **Why only `post-*`, not `pre-*`?** Composer's `pre-update-cmd` fires *before* dependencies are resolved, so the scanner would only see the codebase pre-update — useless against a malicious package that's about to be installed. And on a fresh clone there is no `vendor/`, so `php artisan` does not exist yet and `pre-install-cmd` would crash. Real-time interception of malicious installs is the job of [Docker](#docker-recommended) (preferred) and [Safe-Chain](#safe-chain-recommended) on the host.
 
 ### Exit codes
 
@@ -343,6 +361,7 @@ src/
     ├── TlsVerificationCheck.php
     ├── CorsConfigCheck.php
     ├── PackageFreshnessCheck.php
+    ├── SuspiciousVendorAutoloadCheck.php
     ├── SupplyChainToolingCheck.php
     ├── PathTraversalCheck.php
     ├── WeakCryptographyCheck.php

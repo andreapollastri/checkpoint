@@ -1,37 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checkpoint — Laravel Security Scanner</title>
-  <meta name="description" content="A Laravel security scanner that audits your application for common vulnerabilities — from known CVEs to hardcoded secrets — via a single Artisan command." />
+  <meta name="description"
+    content="A Laravel security scanner that audits your application for common vulnerabilities — from known CVEs to hardcoded secrets — via a single Artisan command." />
   <meta property="og:title" content="Checkpoint — Laravel Security Scanner" />
-  <meta property="og:description" content="Audit your Laravel app for 25 vulnerability categories with a single Artisan command — including SSRF, path traversal, weak crypto, supply-chain freshness, CORS, TLS verification." />
+  <meta property="og:description"
+    content="Audit your Laravel app for 25 vulnerability categories with a single Artisan command — including SSRF, path traversal, weak crypto, supply-chain freshness, CORS, TLS verification." />
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #080b10;
-      --surface:   #0d1117;
-      --card:      #111820;
-      --border:    #1e2d3d;
-      --accent:    #e11d48;
-      --accent2:   #f43f5e;
-      --green:     #10b981;
-      --yellow:    #f59e0b;
-      --red:       #ef4444;
-      --blue:      #3b82f6;
-      --text:      #e2e8f0;
-      --muted:     #64748b;
-      --mono:      'JetBrains Mono', monospace;
-      --sans:      'Inter', system-ui, sans-serif;
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html { scroll-behavior: smooth; }
+    :root {
+      --bg: #080b10;
+      --surface: #0d1117;
+      --card: #111820;
+      --border: #1e2d3d;
+      --accent: #e11d48;
+      --accent2: #f43f5e;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', system-ui, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       font-family: var(--sans);
@@ -56,8 +69,8 @@
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(225,29,72,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(225,29,72,.04) 1px, transparent 1px);
+        linear-gradient(rgba(225, 29, 72, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(225, 29, 72, .04) 1px, transparent 1px);
       background-size: 48px 48px;
       pointer-events: none;
       z-index: 0;
@@ -66,13 +79,15 @@
     /* ---------- NAV ---------- */
     nav {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 1rem 2rem;
-      background: rgba(8,11,16,.8);
+      background: rgba(8, 11, 16, .8);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
     }
@@ -85,7 +100,11 @@
       letter-spacing: -.02em;
     }
 
-    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
 
     .nav-links a {
       color: var(--muted);
@@ -94,7 +113,10 @@
       font-weight: 500;
       transition: color .2s;
     }
-    .nav-links a:hover { color: var(--text); }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
 
     .btn-gh {
       display: inline-flex;
@@ -109,7 +131,11 @@
       text-decoration: none;
       transition: background .2s, transform .15s;
     }
-    .btn-gh:hover { background: var(--accent2); transform: translateY(-1px); }
+
+    .btn-gh:hover {
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
 
     /* ---------- HERO ---------- */
     .hero {
@@ -127,9 +153,11 @@
 
     .hero-glow {
       position: absolute;
-      width: 800px; height: 500px;
-      background: radial-gradient(ellipse at center, rgba(225,29,72,.18) 0%, transparent 70%);
-      top: 50%; left: 50%;
+      width: 800px;
+      height: 500px;
+      background: radial-gradient(ellipse at center, rgba(225, 29, 72, .18) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -55%);
       pointer-events: none;
     }
@@ -138,8 +166,8 @@
       display: inline-flex;
       align-items: center;
       gap: .5rem;
-      border: 1px solid rgba(225,29,72,.35);
-      background: rgba(225,29,72,.08);
+      border: 1px solid rgba(225, 29, 72, .35);
+      background: rgba(225, 29, 72, .08);
       color: var(--accent2);
       padding: .3rem 1rem;
       border-radius: 999px;
@@ -151,15 +179,25 @@
     }
 
     .badge-dot {
-      width: 6px; height: 6px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--accent);
       animation: pulse 2s ease-in-out infinite;
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: .4; transform: scale(.7); }
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: .4;
+        transform: scale(.7);
+      }
     }
 
     h1 {
@@ -170,7 +208,9 @@
       margin-bottom: 1.25rem;
     }
 
-    h1 span { color: var(--accent); }
+    h1 span {
+      color: var(--accent);
+    }
 
     .hero-sub {
       font-size: clamp(1rem, 2.5vw, 1.25rem);
@@ -200,12 +240,13 @@
       font-weight: 700;
       text-decoration: none;
       transition: background .2s, transform .15s, box-shadow .2s;
-      box-shadow: 0 0 30px rgba(225,29,72,.3);
+      box-shadow: 0 0 30px rgba(225, 29, 72, .3);
     }
+
     .btn-primary:hover {
       background: var(--accent2);
       transform: translateY(-2px);
-      box-shadow: 0 0 45px rgba(225,29,72,.45);
+      box-shadow: 0 0 45px rgba(225, 29, 72, .45);
     }
 
     .btn-secondary {
@@ -213,7 +254,7 @@
       align-items: center;
       gap: .5rem;
       border: 1px solid var(--border);
-      background: rgba(255,255,255,.03);
+      background: rgba(255, 255, 255, .03);
       color: var(--text);
       padding: .75rem 1.75rem;
       border-radius: 8px;
@@ -222,9 +263,10 @@
       text-decoration: none;
       transition: border-color .2s, background .2s, transform .15s;
     }
+
     .btn-secondary:hover {
       border-color: var(--accent);
-      background: rgba(225,29,72,.06);
+      background: rgba(225, 29, 72, .06);
       transform: translateY(-2px);
     }
 
@@ -237,7 +279,7 @@
       max-width: 700px;
       width: 100%;
       text-align: left;
-      box-shadow: 0 32px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04);
+      box-shadow: 0 32px 80px rgba(0, 0, 0, .7), 0 0 0 1px rgba(255, 255, 255, .04);
     }
 
     .terminal-bar {
@@ -249,10 +291,23 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot-r { background: #ef4444; }
-    .dot-y { background: #f59e0b; }
-    .dot-g { background: #10b981; }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .dot-r {
+      background: #ef4444;
+    }
+
+    .dot-y {
+      background: #f59e0b;
+    }
+
+    .dot-g {
+      background: #10b981;
+    }
 
     .terminal-title {
       font-family: var(--mono);
@@ -269,14 +324,39 @@
       overflow-x: auto;
     }
 
-    .t-prompt { color: var(--accent); }
-    .t-cmd    { color: var(--text); }
-    .t-pass   { color: var(--green); }
-    .t-fail   { color: var(--red); }
-    .t-warn   { color: var(--yellow); }
-    .t-muted  { color: var(--muted); }
-    .t-detail { color: #94a3b8; padding-left: 1rem; }
-    .t-summary { color: var(--text); font-weight: 700; }
+    .t-prompt {
+      color: var(--accent);
+    }
+
+    .t-cmd {
+      color: var(--text);
+    }
+
+    .t-pass {
+      color: var(--green);
+    }
+
+    .t-fail {
+      color: var(--red);
+    }
+
+    .t-warn {
+      color: var(--yellow);
+    }
+
+    .t-muted {
+      color: var(--muted);
+    }
+
+    .t-detail {
+      color: #94a3b8;
+      padding-left: 1rem;
+    }
+
+    .t-summary {
+      color: var(--text);
+      font-weight: 700;
+    }
 
     /* ---------- SECTION ---------- */
     section {
@@ -330,14 +410,17 @@
       gap: 1rem;
       transition: background .2s;
     }
-    .check-card:hover { background: #161f2a; }
+
+    .check-card:hover {
+      background: #161f2a;
+    }
 
     .check-num {
       font-family: var(--mono);
       font-size: .7rem;
       font-weight: 700;
       color: var(--muted);
-      background: rgba(255,255,255,.04);
+      background: rgba(255, 255, 255, .04);
       border: 1px solid var(--border);
       border-radius: 4px;
       padding: .2rem .45rem;
@@ -345,7 +428,10 @@
       margin-top: .15rem;
     }
 
-    .check-body { flex: 1; min-width: 0; }
+    .check-body {
+      flex: 1;
+      min-width: 0;
+    }
 
     .check-name {
       font-size: .9rem;
@@ -370,8 +456,18 @@
       flex-shrink: 0;
       margin-top: .15rem;
     }
-    .sev-fail { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.25); }
-    .sev-warn { background: rgba(245,158,11,.12); color: var(--yellow); border: 1px solid rgba(245,158,11,.2); }
+
+    .sev-fail {
+      background: rgba(239, 68, 68, .15);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, .25);
+    }
+
+    .sev-warn {
+      background: rgba(245, 158, 11, .12);
+      color: var(--yellow);
+      border: 1px solid rgba(245, 158, 11, .2);
+    }
 
     /* ---------- INSTALL ---------- */
     .install-wrap {
@@ -382,7 +478,9 @@
     }
 
     @media (max-width: 768px) {
-      .install-wrap { grid-template-columns: 1fr; }
+      .install-wrap {
+        grid-template-columns: 1fr;
+      }
     }
 
     .code-block {
@@ -419,7 +517,11 @@
       cursor: pointer;
       transition: color .2s, border-color .2s;
     }
-    .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    .copy-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
 
     pre {
       padding: 1.25rem 1.5rem;
@@ -430,10 +532,22 @@
       color: var(--text);
     }
 
-    pre .cmd  { color: #a5f3fc; }
-    pre .flag { color: #c4b5fd; }
-    pre .arg  { color: #fde68a; }
-    pre .comment { color: var(--muted); font-style: italic; }
+    pre .cmd {
+      color: #a5f3fc;
+    }
+
+    pre .flag {
+      color: #c4b5fd;
+    }
+
+    pre .arg {
+      color: #fde68a;
+    }
+
+    pre .comment {
+      color: var(--muted);
+      font-style: italic;
+    }
 
     /* ---------- FEATURES ---------- */
     .features-grid {
@@ -449,17 +563,21 @@
       padding: 1.75rem;
       transition: border-color .2s, transform .2s;
     }
+
     .feature-card:hover {
-      border-color: rgba(225,29,72,.4);
+      border-color: rgba(225, 29, 72, .4);
       transform: translateY(-3px);
     }
 
     .feature-icon {
-      width: 40px; height: 40px;
-      background: rgba(225,29,72,.1);
-      border: 1px solid rgba(225,29,72,.2);
+      width: 40px;
+      height: 40px;
+      background: rgba(225, 29, 72, .1);
+      border: 1px solid rgba(225, 29, 72, .2);
       border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1.1rem;
       margin-bottom: 1rem;
     }
@@ -536,16 +654,26 @@
       color: var(--accent);
       text-decoration: none;
     }
-    .footer-copy a:hover { text-decoration: underline; }
 
-    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-copy a:hover {
+      text-decoration: underline;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
     .footer-links a {
       font-size: .8rem;
       color: var(--muted);
       text-decoration: none;
       transition: color .2s;
     }
-    .footer-links a:hover { color: var(--text); }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
 
     /* ---------- DIVIDER ---------- */
     .divider {
@@ -558,17 +686,33 @@
     }
 
     /* ---------- SCROLLBAR ---------- */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
 
     /* ---------- RESPONSIVE NAV ---------- */
     @media (max-width: 600px) {
-      .nav-links a:not(.btn-gh) { display: none; }
+      .nav-links a:not(.btn-gh) {
+        display: none;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="grid-bg"></div>
 
@@ -581,7 +725,10 @@
       <a href="#automate">Automate</a>
       <a href="#features">Features</a>
       <a href="https://github.com/andreapollastri/checkpoint" target="_blank" rel="noopener" class="btn-gh">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+        </svg>
         GitHub
       </a>
     </div>
@@ -599,16 +746,24 @@
     <h1>Secure your<br><span>Laravel app.</span></h1>
 
     <p class="hero-sub">
-      Audit your application for 25 vulnerability categories — from CVEs and hardcoded secrets to SSRF, path traversal, weak crypto and supply-chain freshness — with a single Artisan command.
+      Audit your application for 25 vulnerability categories — from CVEs and hardcoded secrets to SSRF, path traversal,
+      weak crypto and supply-chain freshness — with a single Artisan command.
     </p>
 
     <div class="hero-actions">
       <a href="https://github.com/andreapollastri/checkpoint" target="_blank" rel="noopener" class="btn-primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+        </svg>
         View on GitHub
       </a>
       <a href="#install" class="btn-secondary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6" />
+          <polyline points="8 6 2 12 8 18" />
+        </svg>
         Quick Install
       </a>
     </div>
@@ -622,30 +777,36 @@
         <span class="terminal-title">~ php artisan checkpoint:scan</span>
       </div>
       <div class="terminal-body">
-        <pre class="t-muted" style="white-space:pre;margin:0;padding:0;font-family:var(--mono);font-size:.8rem;line-height:1.9;">  ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗██████╗  ██████╗ ██╗███╗  ██╗████████╗
+        <pre class="t-muted"
+          style="white-space:pre;margin:0;padding:0;font-family:var(--mono);font-size:.8rem;line-height:1.9;">  ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗██████╗  ██████╗ ██╗███╗  ██╗████████╗
  ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝██╔══██╗██╔═══██╗██║████╗ ██║╚══██╔══╝
  ██║     ███████║█████╗  ██║     █████╔╝ ██████╔╝██║   ██║██║██╔██╗██║   ██║
  ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗ ██╔═══╝ ██║   ██║██║██║╚████║   ██║
   ╚█████╗██║  ██║███████╗ ╚█████╗██║  ██╗██║      ╚█████╔╝██║██║ ╚███║   ██║
    ╚════╝╚═╝  ╚═╝╚══════╝  ╚════╝╚═╝  ╚═╝╚═╝       ╚════╝ ╚═╝╚═╝  ╚══╝   ╚═╝</pre>
-        <br/>
-        <div><span class="t-pass">  PASS</span>  <span class="t-cmd">Composer CVE Audit</span></div>
-        <div><span class="t-muted">        No known CVEs in Composer dependencies.</span></div>
-        <br/>
-        <div><span class="t-fail">  FAIL</span>  <span class="t-cmd">Hardcoded Secrets</span></div>
-        <div class="t-detail">✗ app/Services/PaymentService.php:14 — 'api_key' =&gt; 'sk_live_abc123…' <span style="color:var(--blue)">[a1b2c3d4e5f6]</span></div>
-        <div class="t-detail">✗ config/services.php:8 — $secret = 'supersecretvalue' <span style="color:var(--blue)">[9f8e7d6c5b4a]</span></div>
-        <br/>
-        <div><span class="t-fail">  FAIL</span>  <span class="t-cmd">Path Traversal Risks</span></div>
-        <div class="t-detail">✗ app/Http/Controllers/DownloadController.php:24 — Storage::get($request-&gt;path) <span style="color:var(--blue)">[7b6a5f4e3d2c]</span></div>
-        <br/>
-        <div><span class="t-warn">  WARN</span>  <span class="t-cmd">Environment Configuration</span></div>
-        <div class="t-detail">⚑ APP_DEBUG is true — stack traces exposed to end users. <span style="color:var(--blue)">[5c4b3a2d1e0f]</span></div>
-        <br/>
-        <div><span class="t-muted">  ─────────────────────────────────────────────────────</span></div>
-        <div>  <span class="t-summary">Summary</span>  <span class="t-pass">19 passed</span>  <span class="t-warn">4 warning(s)</span>  <span class="t-fail">2 failed</span>  <span class="t-muted">(25 checks total)</span></div>
-        <br/>
-        <div>  <span class="t-fail">Scan result: FAIL — fix the issues above before deploying.</span></div>
+        <br />
+        <div><span class="t-pass"> PASS</span> <span class="t-cmd">Composer CVE Audit</span></div>
+        <div><span class="t-muted"> No known CVEs in Composer dependencies.</span></div>
+        <br />
+        <div><span class="t-fail"> FAIL</span> <span class="t-cmd">Hardcoded Secrets</span></div>
+        <div class="t-detail">✗ app/Services/PaymentService.php:14 — 'api_key' =&gt; 'sk_live_abc123…' <span
+            style="color:var(--blue)">[a1b2c3d4e5f6]</span></div>
+        <div class="t-detail">✗ config/services.php:8 — $secret = 'supersecretvalue' <span
+            style="color:var(--blue)">[9f8e7d6c5b4a]</span></div>
+        <br />
+        <div><span class="t-fail"> FAIL</span> <span class="t-cmd">Path Traversal Risks</span></div>
+        <div class="t-detail">✗ app/Http/Controllers/DownloadController.php:24 — Storage::get($request-&gt;path) <span
+            style="color:var(--blue)">[7b6a5f4e3d2c]</span></div>
+        <br />
+        <div><span class="t-warn"> WARN</span> <span class="t-cmd">Environment Configuration</span></div>
+        <div class="t-detail">⚑ APP_DEBUG is true — stack traces exposed to end users. <span
+            style="color:var(--blue)">[5c4b3a2d1e0f]</span></div>
+        <br />
+        <div><span class="t-muted"> ─────────────────────────────────────────────────────</span></div>
+        <div> <span class="t-summary">Summary</span> <span class="t-pass">19 passed</span> <span class="t-warn">4
+            warning(s)</span> <span class="t-fail">2 failed</span> <span class="t-muted">(25 checks total)</span></div>
+        <br />
+        <div> <span class="t-fail">Scan result: FAIL — fix the issues above before deploying.</span></div>
       </div>
     </div>
   </div>
@@ -676,7 +837,8 @@
   <section id="checks">
     <div class="section-label">Vulnerability Coverage</div>
     <h2 class="section-title">25 checks. Zero excuses.</h2>
-    <p class="section-sub">Every scan covers the OWASP Top 10, Laravel-specific pitfalls, and modern supply-chain risk — automatically.</p>
+    <p class="section-sub">Every scan covers the OWASP Top 10, Laravel-specific pitfalls, and modern supply-chain risk —
+      automatically.</p>
 
     <div class="checks-grid">
 
@@ -684,7 +846,8 @@
         <span class="check-num">01</span>
         <div class="check-body">
           <div class="check-name">Composer CVE Audit</div>
-          <div class="check-desc">Runs <code style="font-family:var(--mono);color:var(--accent)">composer audit</code> and reports known advisories in your PHP dependencies.</div>
+          <div class="check-desc">Runs <code style="font-family:var(--mono);color:var(--accent)">composer audit</code>
+            and reports known advisories in your PHP dependencies.</div>
         </div>
         <span class="sev sev-fail">FAIL</span>
       </div>
@@ -693,7 +856,8 @@
         <span class="check-num">02</span>
         <div class="check-body">
           <div class="check-name">NPM CVE Audit</div>
-          <div class="check-desc">Runs <code style="font-family:var(--mono);color:var(--accent)">npm audit</code> and flags critical and high-severity vulnerabilities.</div>
+          <div class="check-desc">Runs <code style="font-family:var(--mono);color:var(--accent)">npm audit</code> and
+            flags critical and high-severity vulnerabilities.</div>
         </div>
         <span class="sev sev-fail">FAIL/WARN</span>
       </div>
@@ -729,7 +893,8 @@
         <span class="check-num">06</span>
         <div class="check-body">
           <div class="check-name">Hardcoded Secrets</div>
-          <div class="check-desc">Scans PHP/JS for API keys, Stripe tokens, AWS credentials, GitHub PATs, PEM headers.</div>
+          <div class="check-desc">Scans PHP/JS for API keys, Stripe tokens, AWS credentials, GitHub PATs, PEM headers.
+          </div>
         </div>
         <span class="sev sev-fail">FAIL</span>
       </div>
@@ -747,7 +912,8 @@
         <span class="check-num">08</span>
         <div class="check-body">
           <div class="check-name">Mass Assignment</div>
-          <div class="check-desc">Finds $guarded = [], Model::unguard(), or models missing fillable/guarded definitions.</div>
+          <div class="check-desc">Finds $guarded = [], Model::unguard(), or models missing fillable/guarded definitions.
+          </div>
         </div>
         <span class="sev sev-warn">WARN</span>
       </div>
@@ -765,7 +931,8 @@
         <span class="check-num">10</span>
         <div class="check-body">
           <div class="check-name">CSRF Protection</div>
-          <div class="check-desc">Detects forms with POST/PUT/PATCH/DELETE missing @csrf and verifies middleware presence.</div>
+          <div class="check-desc">Detects forms with POST/PUT/PATCH/DELETE missing @csrf and verifies middleware
+            presence.</div>
         </div>
         <span class="sev sev-fail">FAIL</span>
       </div>
@@ -774,7 +941,8 @@
         <span class="check-num">11</span>
         <div class="check-body">
           <div class="check-name">Open Redirect</div>
-          <div class="check-desc">Spots redirect($request->…) or header('Location: '. $var) with unvalidated input.</div>
+          <div class="check-desc">Spots redirect($request->…) or header('Location: '. $var) with unvalidated input.
+          </div>
         </div>
         <span class="sev sev-warn">WARN</span>
       </div>
@@ -783,7 +951,8 @@
         <span class="check-num">12</span>
         <div class="check-body">
           <div class="check-name">Command Injection</div>
-          <div class="check-desc">Finds exec, shell_exec, system, passthru, proc_open called with unescaped variables.</div>
+          <div class="check-desc">Finds exec, shell_exec, system, passthru, proc_open called with unescaped variables.
+          </div>
         </div>
         <span class="sev sev-fail">FAIL</span>
       </div>
@@ -792,7 +961,8 @@
         <span class="check-num">13</span>
         <div class="check-body">
           <div class="check-name">Insecure Deserialization</div>
-          <div class="check-desc">Detects unserialize($userInput) and the classic unserialize(base64_decode(…)) exploit chain.</div>
+          <div class="check-desc">Detects unserialize($userInput) and the classic unserialize(base64_decode(…)) exploit
+            chain.</div>
         </div>
         <span class="sev sev-fail">FAIL</span>
       </div>
@@ -810,7 +980,8 @@
         <span class="check-num">15</span>
         <div class="check-body">
           <div class="check-name">Sensitive Data Exposure</div>
-          <div class="check-desc">Flags display_errors = 1, logging of passwords/tokens, and Telescope always-on configuration.</div>
+          <div class="check-desc">Flags display_errors = 1, logging of passwords/tokens, and Telescope always-on
+            configuration.</div>
         </div>
         <span class="sev sev-warn">WARN</span>
       </div>
@@ -819,7 +990,8 @@
         <span class="check-num">16</span>
         <div class="check-body">
           <div class="check-name">SSRF Risks</div>
-          <div class="check-desc">Detects Http::get($request->…), Guzzle, cURL and file_get_contents called with user-controlled URLs.</div>
+          <div class="check-desc">Detects Http::get($request->…), Guzzle, cURL and file_get_contents called with
+            user-controlled URLs.</div>
         </div>
         <span class="sev sev-fail">FAIL</span>
       </div>
@@ -828,7 +1000,8 @@
         <span class="check-num">17</span>
         <div class="check-body">
           <div class="check-name">TLS Certificate Verification</div>
-          <div class="check-desc">Flags withoutVerifying(), 'verify' => false, CURLOPT_SSL_VERIFYPEER disabled and unsafe stream contexts.</div>
+          <div class="check-desc">Flags withoutVerifying(), 'verify' => false, CURLOPT_SSL_VERIFYPEER disabled and
+            unsafe stream contexts.</div>
         </div>
         <span class="sev sev-fail">FAIL</span>
       </div>
@@ -837,7 +1010,8 @@
         <span class="check-num">18</span>
         <div class="check-body">
           <div class="check-name">CORS Configuration</div>
-          <div class="check-desc">Catches allowed_origins ['*'] combined with supports_credentials => true and other unsafe defaults in config/cors.php.</div>
+          <div class="check-desc">Catches allowed_origins ['*'] combined with supports_credentials => true and other
+            unsafe defaults in config/cors.php.</div>
         </div>
         <span class="sev sev-fail">FAIL/WARN</span>
       </div>
@@ -846,7 +1020,8 @@
         <span class="check-num">19</span>
         <div class="check-body">
           <div class="check-name">Package Freshness</div>
-          <div class="check-desc">Fails the scan when Composer packages were published within the last 3 days — mitigation against supply-chain hijacks. Whitelist via config.</div>
+          <div class="check-desc">Fails the scan when Composer packages were published within the last 3 days —
+            mitigation against supply-chain hijacks. Whitelist via config.</div>
         </div>
         <span class="sev sev-fail">FAIL</span>
       </div>
@@ -855,7 +1030,8 @@
         <span class="check-num">20</span>
         <div class="check-body">
           <div class="check-name">Supply Chain Tooling</div>
-          <div class="check-desc">Warns if no npm install-time guard (Safe-Chain, Socket CLI) is on your PATH when package.json is present.</div>
+          <div class="check-desc">Warns if no npm install-time guard (Safe-Chain, Socket CLI) is on your PATH when
+            package.json is present.</div>
         </div>
         <span class="sev sev-warn">WARN</span>
       </div>
@@ -864,7 +1040,8 @@
         <span class="check-num">21</span>
         <div class="check-body">
           <div class="check-name">Path Traversal</div>
-          <div class="check-desc">Detects Storage::get($request->…), file_get_contents, include and require with user-controlled paths.</div>
+          <div class="check-desc">Detects Storage::get($request->…), file_get_contents, include and require with
+            user-controlled paths.</div>
         </div>
         <span class="sev sev-fail">FAIL</span>
       </div>
@@ -873,7 +1050,8 @@
         <span class="check-num">22</span>
         <div class="check-body">
           <div class="check-name">Weak Cryptography</div>
-          <div class="check-desc">Flags mcrypt_*, ECB cipher mode, DES/3DES/RC4, and md5/sha1 used near password, token or HMAC keywords.</div>
+          <div class="check-desc">Flags mcrypt_*, ECB cipher mode, DES/3DES/RC4, and md5/sha1 used near password, token
+            or HMAC keywords.</div>
         </div>
         <span class="sev sev-fail">FAIL/WARN</span>
       </div>
@@ -882,7 +1060,8 @@
         <span class="check-num">23</span>
         <div class="check-body">
           <div class="check-name">Insecure RNG</div>
-          <div class="check-desc">Detects rand, mt_rand and uniqid used for tokens, CSRF, password reset, or OTP — use random_bytes / Str::random instead.</div>
+          <div class="check-desc">Detects rand, mt_rand and uniqid used for tokens, CSRF, password reset, or OTP — use
+            random_bytes / Str::random instead.</div>
         </div>
         <span class="sev sev-fail">FAIL</span>
       </div>
@@ -891,7 +1070,8 @@
         <span class="check-num">24</span>
         <div class="check-body">
           <div class="check-name">Session &amp; Cookie Security</div>
-          <div class="check-desc">Audits config/session.php for http_only=false, same_site=null/none, secure=false and encrypt=false.</div>
+          <div class="check-desc">Audits config/session.php for http_only=false, same_site=null/none, secure=false and
+            encrypt=false.</div>
         </div>
         <span class="sev sev-warn">WARN</span>
       </div>
@@ -900,7 +1080,8 @@
         <span class="check-num">25</span>
         <div class="check-body">
           <div class="check-name">EOL Versions</div>
-          <div class="check-desc">Fails the scan when Laravel or PHP have left their upstream security-support window — keep dependencies inside the patch lifecycle.</div>
+          <div class="check-desc">Fails the scan when Laravel or PHP have left their upstream security-support window —
+            keep dependencies inside the patch lifecycle.</div>
         </div>
         <span class="sev sev-fail">FAIL/WARN</span>
       </div>
@@ -914,14 +1095,16 @@
   <section id="install">
     <div class="section-label">Get Started</div>
     <h2 class="section-title">Up and running<br>in seconds.</h2>
-    <p class="section-sub">Install as a dev dependency. Auto-discovers itself via Laravel's service provider — no registration needed.</p>
+    <p class="section-sub">Install as a dev dependency. Auto-discovers itself via Laravel's service provider — no
+      registration needed.</p>
 
     <div class="install-wrap">
       <div>
         <div class="code-block" style="margin-bottom:1.25rem">
           <div class="code-header">
             <span class="code-lang">bash — install</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('composer require --dev andreapollastri/checkpoint'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText('composer require --dev andreapollastri/checkpoint'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
           </div>
           <pre><span class="cmd">composer</span> require --dev <span class="arg">andreapollastri/checkpoint</span></pre>
         </div>
@@ -929,7 +1112,8 @@
         <div class="code-block" style="margin-bottom:1.25rem">
           <div class="code-header">
             <span class="code-lang">bash — run all checks</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:scan'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText('php artisan checkpoint:scan'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
           </div>
           <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:scan</span></pre>
         </div>
@@ -937,7 +1121,9 @@
         <div class="code-block" style="margin-bottom:1.25rem">
           <div class="code-header">
             <span class="code-lang">bash — run specific checks</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:scan --only=\"SQL Injection Risks,CSRF Protection\"'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:scan --only=\" SQL
+              Injection Risks,CSRF Protection\"'); this.textContent='Copied!' ;
+              setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
           </div>
           <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:scan</span> <span class="flag">--only</span>=<span class="arg">"SQL Injection Risks,CSRF Protection"</span></pre>
         </div>
@@ -945,7 +1131,8 @@
         <div class="code-block">
           <div class="code-header">
             <span class="code-lang">bash — CI/CD JSON output</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:scan --json | tee checkpoint-report.json'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText('php artisan checkpoint:scan --json | tee checkpoint-report.json'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
           </div>
           <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:scan</span> <span class="flag">--json</span> | tee checkpoint-report.json</pre>
         </div>
@@ -990,18 +1177,22 @@
   <section id="automate">
     <div class="section-label">Automation</div>
     <h2 class="section-title">Scaffold pipelines.<br>Hook every install.</h2>
-    <p class="section-sub">Three commands to wire Checkpoint into your CI/CD provider and your Composer lifecycle — no copy-pasting YAML, no manual setup.</p>
+    <p class="section-sub">Three commands to wire Checkpoint into your CI/CD provider and your Composer lifecycle — no
+      copy-pasting YAML, no manual setup.</p>
 
     <div class="features-grid">
 
       <div class="feature-card">
         <div class="feature-icon">⚙️</div>
         <div class="feature-title">GitHub Actions</div>
-        <div class="feature-desc" style="margin-bottom:1rem">Generates <code style="font-family:var(--mono);color:var(--accent)">.github/workflows/checkpoint.yml</code> — triggers on push to main/master and every pull request, with Composer caching baked in.</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Generates <code
+            style="font-family:var(--mono);color:var(--accent)">.github/workflows/checkpoint.yml</code> — triggers on
+          push to main/master and every pull request, with Composer caching baked in.</div>
         <div class="code-block">
           <div class="code-header">
             <span class="code-lang">bash</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:github'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText('php artisan checkpoint:github'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
           </div>
           <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:github</span></pre>
         </div>
@@ -1010,11 +1201,15 @@
       <div class="feature-card">
         <div class="feature-icon">🦊</div>
         <div class="feature-title">GitLab CI</div>
-        <div class="feature-desc" style="margin-bottom:1rem">Generates <code style="font-family:var(--mono);color:var(--accent)">.gitlab-ci.yml</code> — runs on merge requests and default-branch pushes via the <code style="font-family:var(--mono);color:var(--accent)">composer:2</code> image.</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Generates <code
+            style="font-family:var(--mono);color:var(--accent)">.gitlab-ci.yml</code> — runs on merge requests and
+          default-branch pushes via the <code style="font-family:var(--mono);color:var(--accent)">composer:2</code>
+          image.</div>
         <div class="code-block">
           <div class="code-header">
             <span class="code-lang">bash</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:gitlab'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText('php artisan checkpoint:gitlab'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
           </div>
           <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:gitlab</span></pre>
         </div>
@@ -1023,11 +1218,15 @@
       <div class="feature-card">
         <div class="feature-icon">🪝</div>
         <div class="feature-title">Composer Hooks</div>
-        <div class="feature-desc" style="margin-bottom:1rem">Append-only patch on <code style="font-family:var(--mono);color:var(--accent)">composer.json</code> — the scan runs after every <code style="font-family:var(--mono);color:var(--accent)">composer install</code> / <code style="font-family:var(--mono);color:var(--accent)">update</code>. Idempotent and removable.</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Append-only patch on <code
+            style="font-family:var(--mono);color:var(--accent)">composer.json</code> — the scan runs after every <code
+            style="font-family:var(--mono);color:var(--accent)">composer install</code> / <code
+            style="font-family:var(--mono);color:var(--accent)">update</code>. Idempotent and removable.</div>
         <div class="code-block">
           <div class="code-header">
             <span class="code-lang">bash</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan checkpoint:install-hooks'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText('php artisan checkpoint:install-hooks'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
           </div>
           <pre><span class="cmd">php artisan</span> <span class="arg">checkpoint:install-hooks</span></pre>
         </div>
@@ -1036,11 +1235,14 @@
       <div class="feature-card">
         <div class="feature-icon">🛡️</div>
         <div class="feature-title">Configurable Checks</div>
-        <div class="feature-desc" style="margin-bottom:1rem">Publish <code style="font-family:var(--mono);color:var(--accent)">config/checkpoint.php</code> to toggle individual checks, set the Package Freshness window, or whitelist trusted vendors.</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Publish <code
+            style="font-family:var(--mono);color:var(--accent)">config/checkpoint.php</code> to toggle individual
+          checks, set the Package Freshness window, or whitelist trusted vendors.</div>
         <div class="code-block">
           <div class="code-header">
             <span class="code-lang">bash</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('php artisan vendor:publish --tag=checkpoint-config'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText('php artisan vendor:publish --tag=checkpoint-config'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
           </div>
           <pre><span class="cmd">php artisan</span> <span class="arg">vendor:publish</span> <span class="flag">--tag</span>=<span class="arg">checkpoint-config</span></pre>
         </div>
@@ -1049,11 +1251,16 @@
       <div class="feature-card">
         <div class="feature-icon">🔗</div>
         <div class="feature-title">Safe-Chain (recommended)</div>
-        <div class="feature-desc" style="margin-bottom:1rem">Pair Checkpoint with <a href="https://www.npmjs.com/package/@aikidosec/safe-chain" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">Safe-Chain</a> to intercept known-malicious npm packages <em>before</em> their install scripts run. Checkpoint's Supply Chain Tooling check verifies it's on your PATH.</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Pair Checkpoint with <a
+            href="https://www.npmjs.com/package/@aikidosec/safe-chain" target="_blank" rel="noopener"
+            style="color:var(--accent);text-decoration:none">Safe-Chain</a> to intercept known-malicious npm packages
+          <em>before</em> their install scripts run. Checkpoint's Supply Chain Tooling check verifies it's on your PATH.
+        </div>
         <div class="code-block">
           <div class="code-header">
             <span class="code-lang">bash</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('npm install -g @aikidosec/safe-chain && safe-chain setup'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText('npm install -g @aikidosec/safe-chain && safe-chain setup'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
           </div>
           <pre><span class="cmd">npm</span> install -g <span class="arg">@aikidosec/safe-chain</span>
 <span class="cmd">safe-chain</span> setup</pre>
@@ -1063,13 +1270,21 @@
       <div class="feature-card">
         <div class="feature-icon">📦</div>
         <div class="feature-title">Package Freshness Gate</div>
-        <div class="feature-desc">Composer packages released within the last 3 days fail the scan — a deploy gate against ongoing supply-chain hijacks. The window and whitelist are fully configurable.</div>
+        <div class="feature-desc">Composer packages released within the last 3 days fail the scan — a deploy gate
+          against ongoing supply-chain hijacks. The window and whitelist are fully configurable; set <code
+            style="font-family:var(--mono);color:var(--accent)">minimum_age_days</code> to <code
+            style="font-family:var(--mono);color:var(--accent)">0</code> to bypass the gate entirely without disabling
+          the check.</div>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon">🤫</div>
         <div class="feature-title">Per-Finding Suppression</div>
-        <div class="feature-desc">Every FAIL/WARN gets a stable 12-char hash <code style="font-family:var(--mono);color:var(--accent)">[a1b2c3d4e5f6]</code>. Drop the hash into <code style="font-family:var(--mono);color:var(--accent)">config/checkpoint.php</code> → <code style="font-family:var(--mono);color:var(--accent)">suppressed</code> to silence false positives. Hashes are content-stable across line-shifting refactors.</div>
+        <div class="feature-desc">Every FAIL/WARN gets a stable 12-char hash <code
+            style="font-family:var(--mono);color:var(--accent)">[a1b2c3d4e5f6]</code>. Drop the hash into <code
+            style="font-family:var(--mono);color:var(--accent)">config/checkpoint.php</code> → <code
+            style="font-family:var(--mono);color:var(--accent)">suppressed</code> to silence false positives. Hashes are
+          content-stable across line-shifting refactors.</div>
       </div>
 
     </div>
@@ -1088,19 +1303,22 @@
       <div class="feature-card">
         <div class="feature-icon">🔍</div>
         <div class="feature-title">Single Command</div>
-        <div class="feature-desc">One Artisan command covers your entire security surface. No configuration files, no complex setup.</div>
+        <div class="feature-desc">One Artisan command covers your entire security surface. No configuration files, no
+          complex setup.</div>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon">⚡</div>
         <div class="feature-title">CI/CD Ready</div>
-        <div class="feature-desc">Exits with code 1 on any FAIL result, making it a perfect pipeline gate in GitHub Actions or any CI system.</div>
+        <div class="feature-desc">Exits with code 1 on any FAIL result, making it a perfect pipeline gate in GitHub
+          Actions or any CI system.</div>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon">📋</div>
         <div class="feature-title">JSON Output</div>
-        <div class="feature-desc">Structured JSON output for integration with dashboards, reporting tools, and automated workflows.</div>
+        <div class="feature-desc">Structured JSON output for integration with dashboards, reporting tools, and automated
+          workflows.</div>
       </div>
 
       <div class="feature-card">
@@ -1112,13 +1330,15 @@
       <div class="feature-card">
         <div class="feature-icon">🔌</div>
         <div class="feature-title">Extensible</div>
-        <div class="feature-desc">Extend AbstractCheck to add custom vulnerability checks specific to your application logic.</div>
+        <div class="feature-desc">Extend AbstractCheck to add custom vulnerability checks specific to your application
+          logic.</div>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon">🛡️</div>
         <div class="feature-title">Laravel Native</div>
-        <div class="feature-desc">Auto-discovers via Laravel's package discovery. Supports Laravel 8 through 13 with PHP 8.1+.</div>
+        <div class="feature-desc">Auto-discovers via Laravel's package discovery. Supports Laravel 8 through 13 with PHP
+          8.1+.</div>
       </div>
 
     </div>
@@ -1127,14 +1347,17 @@
   <!-- FOOTER -->
   <footer>
     <div class="footer-copy">
-      &copy; 2024–2026 <a href="https://andreapollastri.net" target="_blank" rel="noopener">Andrea Pollastri</a> — MIT License
+      &copy; 2026 <a href="https://andreapollastri.net" target="_blank" rel="noopener">Andrea Pollastri</a> — MIT
+      License
     </div>
     <div class="footer-links">
       <a href="https://github.com/andreapollastri/checkpoint" target="_blank" rel="noopener">GitHub</a>
       <a href="https://packagist.org/packages/andreapollastri/checkpoint" target="_blank" rel="noopener">Packagist</a>
-      <a href="https://github.com/andreapollastri/checkpoint/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+      <a href="https://github.com/andreapollastri/checkpoint/blob/main/LICENSE" target="_blank"
+        rel="noopener">License</a>
     </div>
   </footer>
 
 </body>
+
 </html>

@@ -38,6 +38,7 @@ return [
         Checks\TlsVerificationCheck::class => true,
         Checks\CorsConfigCheck::class => true,
         Checks\PackageFreshnessCheck::class => true,
+        Checks\SuspiciousVendorAutoloadCheck::class => true,
         Checks\SupplyChainToolingCheck::class => true,
         Checks\PathTraversalCheck::class => true,
         Checks\WeakCryptographyCheck::class => true,
@@ -68,6 +69,30 @@ return [
             // release of the scanner cannot block its own user's deploy.
             'andreapollastri/checkpoint',
             // 'vendor/package',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Suspicious Vendor Autoload
+    |--------------------------------------------------------------------------
+    |
+    | The "Suspicious Vendor Autoload" check warns when a package under
+    | vendor/ registers PHP files via `autoload.files` — the exact mechanism
+    | abused by the May 2026 Laravel-Lang supply-chain attack to execute
+    | code on every request.
+    |
+    | A baked-in whitelist already covers packages that legitimately use
+    | this mechanism (laravel/framework, symfony/polyfill-*, guzzlehttp/*,
+    | ramsey/uuid, …). Add your own trusted entries below — exact matches
+    | or `vendor/*` wildcards are both supported.
+    |
+    */
+
+    'suspicious_autoload' => [
+        'whitelist' => [
+            // 'my-org/internal-helpers',
+            // 'acme/*',
         ],
     ],
 

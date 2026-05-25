@@ -57,6 +57,10 @@ class Scanner
                 (int) \config('checkpoint.package_freshness.minimum_age_days', 3),
                 (array) \config('checkpoint.package_freshness.whitelist', []),
             ),
+            Checks\SuspiciousVendorAutoloadCheck::class => fn () => new Checks\SuspiciousVendorAutoloadCheck(
+                $basePath,
+                (array) \config('checkpoint.suspicious_autoload.whitelist', []),
+            ),
             Checks\SupplyChainToolingCheck::class => fn () => new Checks\SupplyChainToolingCheck($basePath),
             Checks\PathTraversalCheck::class => fn () => new Checks\PathTraversalCheck($basePath),
             Checks\WeakCryptographyCheck::class => fn () => new Checks\WeakCryptographyCheck($basePath),
