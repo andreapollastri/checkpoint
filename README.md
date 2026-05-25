@@ -43,8 +43,8 @@ php artisan checkpoint:scan
 
 ## Requirements
 
-- **PHP** `^8.1` (see [Framework support](#framework-support) for how your Laravel version may raise the floor)
-- **Laravel** `8`–`13` (same major as `illuminate/*` 8.x–13.x used by your app)
+- **PHP** `^8.2` (PHP 8.2 or higher)
+- **Laravel** `10` to `13` (matching the `illuminate/*` 10.x to 13.x your app uses)
 
 ---
 
@@ -283,7 +283,7 @@ Checkpoint can scaffold a ready-to-use pipeline for either provider in one comma
 php artisan checkpoint:github
 ```
 
-Creates `.github/workflows/checkpoint.yml` — triggers on push to `main`/`master` and on every pull request. Uses `actions/checkout@v4`, `shivammathur/setup-php@v2` (PHP 8.2), Composer cache, and runs `php artisan checkpoint:scan`. Pass `--force` to overwrite an existing file.
+Creates `.github/workflows/checkpoint.yml`. Triggers on push to `main`/`master` and on every pull request. Uses `actions/checkout@v6`, `shivammathur/setup-php@v2` (PHP 8.3), Composer cache, and runs `php artisan checkpoint:scan`. Pass `--force` to overwrite an existing file.
 
 ### GitLab CI
 
