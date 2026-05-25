@@ -6,9 +6,10 @@ class EolVersionCheck extends AbstractCheck
 {
     // EOL cutoffs (as of 2026-05). FAIL = no security fixes at all.
     // WARN = security fixes ending within ~12 months.
-    private const PHP_EOL_BELOW = 80200;       // PHP < 8.2 → no support
     private const PHP_WARN_BELOW = 80300;      // PHP 8.2 → security ends Dec 2026
+
     private const LARAVEL_EOL_MAJOR = 11;      // Laravel < 11 → EOL; Laravel 11 → security ended Mar 2026
+
     private const LARAVEL_WARN_MAJOR = 12;     // Laravel 11 → warn
 
     public function __construct(private readonly string $basePath) {}
@@ -24,10 +25,8 @@ class EolVersionCheck extends AbstractCheck
         $hasCritical = false;
 
         // ---- PHP ----
-        if (PHP_VERSION_ID < self::PHP_EOL_BELOW) {
-            $findings[] = 'PHP '.PHP_VERSION.' is end-of-life — no security fixes from upstream. Upgrade to 8.3+ as soon as possible.';
-            $hasCritical = true;
-        } elseif (PHP_VERSION_ID < self::PHP_WARN_BELOW) {
+        // Package floor is PHP 8.2, so older unsupported versions cannot install this scanner.
+        if (PHP_VERSION_ID < self::PHP_WARN_BELOW) {
             $findings[] = 'PHP '.PHP_VERSION.' is in security-only support and approaches end-of-life. Plan upgrade to 8.3+.';
         }
 

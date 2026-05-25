@@ -5,12 +5,12 @@ namespace Checkpoint;
 use Checkpoint\Checks\AbstractCheck;
 use Checkpoint\Checks\CheckResult;
 
-class Scanner
+final class Scanner
 {
     /** @var AbstractCheck[] */
     private array $checks = [];
 
-    public function add(AbstractCheck $check): static
+    public function add(AbstractCheck $check): self
     {
         $this->checks[] = $check;
 
@@ -31,7 +31,7 @@ class Scanner
         return $results;
     }
 
-    public static function withDefaultChecks(string $basePath): static
+    public static function withDefaultChecks(string $basePath): self
     {
         $factories = [
             Checks\ComposerAuditCheck::class => fn () => new Checks\ComposerAuditCheck($basePath),
@@ -70,7 +70,7 @@ class Scanner
         ];
 
         $enabled = (array) \config('checkpoint.checks', []);
-        $scanner = new static;
+        $scanner = new self;
 
         foreach ($factories as $class => $factory) {
             if (($enabled[$class] ?? true) === false) {

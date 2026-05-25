@@ -77,14 +77,14 @@ class ScanCommand extends Command
         foreach ($results as $name => $result) {
             match ($result->status) {
                 CheckResult::PASS => $this->renderPass($name, $result),
-                CheckResult::WARN => $this->renderWarn($name, $result),
                 CheckResult::FAIL => $this->renderFail($name, $result),
+                default => $this->renderWarn($name, $result),
             };
 
             match ($result->status) {
                 CheckResult::PASS => $passed++,
-                CheckResult::WARN => $warned++,
                 CheckResult::FAIL => $failed++,
+                default => $warned++,
             };
         }
 
