@@ -4,8 +4,9 @@
 # Do not commit the lock for library packages; optional if you prefer reproducible CI
 /composer.lock
 
-# PHPUnit
+# PHPUnit / Pest
 .phpunit.result.cache
+.phpunit.cache
 
 # Test / coverage
 /coverage/

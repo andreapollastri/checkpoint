@@ -4,13 +4,16 @@
   "type": "library",
   "license": "MIT",
   "require": {
-    "php": "^8.1",
-    "illuminate/support": "^8.0 || ^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
-    "illuminate/console": "^8.0 || ^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0"
+    "php": "^8.2",
+    "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+    "illuminate/console": "^10.0 || ^11.0 || ^12.0 || ^13.0"
   },
   "require-dev": {
-    "orchestra/testbench": "^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0",
-    "phpunit/phpunit": "^9.5.10 || ^10.0 || ^11.0 || ^12.0 || ^13.0"
+    "orchestra/testbench": "^8.0 || ^9.0 || ^10.0 || ^11.0",
+    "pestphp/pest": "^3.0 || ^4.0",
+    "pestphp/pest-plugin-laravel": "^3.0 || ^4.0",
+    "laravel/pint": "^1.0",
+    "larastan/larastan": "^3.0"
   },
   "autoload": {
     "psr-4": {
@@ -21,6 +24,18 @@
     "psr-4": {
       "Checkpoint\\Tests\\": "tests/"
     }
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    },
+    "sort-packages": true
+  },
+  "scripts": {
+    "analyse": "vendor/bin/phpstan analyse",
+    "test": "vendor/bin/pest",
+    "test-coverage": "vendor/bin/pest --coverage",
+    "format": "vendor/bin/pint"
   },
   "extra": {
     "laravel": {
