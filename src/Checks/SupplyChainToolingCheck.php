@@ -24,7 +24,7 @@ class SupplyChainToolingCheck extends AbstractCheck
             return CheckResult::pass('No package.json found — npm supply-chain tooling not applicable.');
         }
 
-        $finder = new ExecutableFinder();
+        $finder = new ExecutableFinder;
         $found = [];
 
         foreach (self::KNOWN_TOOLS as $binary => $description) {

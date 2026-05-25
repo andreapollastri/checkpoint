@@ -13,7 +13,9 @@ class InstallHooksCommand extends Command
     protected $description = 'Wire `php artisan checkpoint:scan` into composer.json as a post-update / post-install hook';
 
     private const HOOK_COMMAND = '@php artisan checkpoint:scan';
+
     private const HOOK_EVENTS = ['post-update-cmd', 'post-install-cmd'];
+
     private const MARKER = 'checkpoint:scan';
 
     public function handle(): int

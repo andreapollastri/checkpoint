@@ -27,7 +27,7 @@ class SensitiveExposureCheck extends AbstractCheck
         $findings = [];
 
         // Check that error reporting is suppressed
-        $finder = new Finder();
+        $finder = new Finder;
         $finder->files()
             ->in($this->basePath)
             ->name('*.php')

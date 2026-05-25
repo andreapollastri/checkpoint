@@ -26,7 +26,7 @@ class SsrfCheck extends AbstractCheck
 
     public function run(): CheckResult
     {
-        $finder = new Finder();
+        $finder = new Finder;
         $finder->files()
             ->in($this->basePath)
             ->name('*.php')
@@ -43,6 +43,7 @@ class SsrfCheck extends AbstractCheck
                 // Laravel HTTP client: Http::get($request->...), Http::post(..., ...)
                 if (preg_match('/\bHttp::(?:get|post|put|patch|delete|head|send)\s*\(\s*\$(?:'.$userInput.')\b/', $line)) {
                     $findings[] = "{$relative}:".($i + 1).' — Http:: called with user-controlled URL: '.mb_strimwidth(trim($line), 0, 120, '…');
+
                     continue;
                 }
 
@@ -50,6 +51,7 @@ class SsrfCheck extends AbstractCheck
                 if (preg_match('/->(?:request|get|post|put|patch|delete|head|send)\s*\(\s*(?:["\'][A-Z]+["\']\s*,\s*)?\$(?:'.$userInput.')\b/', $line)) {
                     if (preg_match('/Guzzle|GuzzleHttp|HttpClient|Client/', $line) || str_contains($file->getContents(), 'GuzzleHttp')) {
                         $findings[] = "{$relative}:".($i + 1).' — HTTP client called with user-controlled URL: '.mb_strimwidth(trim($line), 0, 120, '…');
+
                         continue;
                     }
                 }
@@ -57,12 +59,14 @@ class SsrfCheck extends AbstractCheck
                 // file_get_contents / fopen / get_headers with user input directly
                 if (preg_match('/\b(?:file_get_contents|fopen|get_headers|readfile)\s*\(\s*\$(?:'.$userInput.')\b/', $line)) {
                     $findings[] = "{$relative}:".($i + 1).' — '.$this->extractFunctionName($line).' with user-controlled URL: '.mb_strimwidth(trim($line), 0, 120, '…');
+
                     continue;
                 }
 
                 // curl_setopt(..., CURLOPT_URL, $request->...)
                 if (preg_match('/curl_setopt\s*\([^,]+,\s*CURLOPT_URL\s*,\s*\$(?:'.$userInput.')\b/', $line)) {
                     $findings[] = "{$relative}:".($i + 1).' — curl_setopt(CURLOPT_URL) with user-controlled URL: '.mb_strimwidth(trim($line), 0, 120, '…');
+
                     continue;
                 }
             }

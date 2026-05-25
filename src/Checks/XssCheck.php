@@ -34,7 +34,7 @@ class XssCheck extends AbstractCheck
             return CheckResult::warn('resources/views/ not found — skipping XSS check.');
         }
 
-        $finder = new Finder();
+        $finder = new Finder;
         $finder->files()
             ->in($viewsPath)
             ->name('*.blade.php');
@@ -54,7 +54,7 @@ class XssCheck extends AbstractCheck
         }
 
         // Also check PHP files for raw echo of request data
-        $phpFinder = new Finder();
+        $phpFinder = new Finder;
         $phpFinder->files()
             ->in($this->basePath)
             ->name('*.php')

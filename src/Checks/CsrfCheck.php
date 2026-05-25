@@ -21,7 +21,7 @@ class CsrfCheck extends AbstractCheck
             return CheckResult::warn('resources/views/ not found — skipping CSRF check.');
         }
 
-        $finder = new Finder();
+        $finder = new Finder;
         $finder->files()->in($viewsPath)->name('*.blade.php');
 
         $findings = [];
@@ -37,7 +37,7 @@ class CsrfCheck extends AbstractCheck
                     || str_contains($content, 'csrf_token()');
 
                 if (! $hasCsrf) {
-                    $findings[] = "{$relative}: ".count($matches[0])." form(s) with POST/PUT/PATCH/DELETE but no @csrf directive.";
+                    $findings[] = "{$relative}: ".count($matches[0]).' form(s) with POST/PUT/PATCH/DELETE but no @csrf directive.';
                 }
             }
         }

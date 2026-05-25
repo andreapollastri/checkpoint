@@ -23,7 +23,7 @@ class OpenRedirectCheck extends AbstractCheck
 
     public function run(): CheckResult
     {
-        $finder = new Finder();
+        $finder = new Finder;
         $finder->files()
             ->in($this->basePath)
             ->name('*.php')
