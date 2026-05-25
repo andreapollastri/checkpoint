@@ -9,7 +9,7 @@
     content="A Laravel security scanner that audits your application for common vulnerabilities — from known CVEs to hardcoded secrets — via a single Artisan command." />
   <meta property="og:title" content="Checkpoint — Laravel Security Scanner" />
   <meta property="og:description"
-    content="Audit your Laravel app for 25 vulnerability categories with a single Artisan command — including SSRF, path traversal, weak crypto, supply-chain freshness, CORS, TLS verification." />
+    content="Audit your Laravel app for 26 vulnerability categories with a single Artisan command — including SSRF, path traversal, weak crypto, supply-chain freshness, suspicious vendor autoload, CORS, TLS verification." />
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -746,8 +746,8 @@
     <h1>Secure your<br><span>Laravel app.</span></h1>
 
     <p class="hero-sub">
-      Audit your application for 25 vulnerability categories — from CVEs and hardcoded secrets to SSRF, path traversal,
-      weak crypto and supply-chain freshness — with a single Artisan command.
+      Audit your application for 26 vulnerability categories — from CVEs and hardcoded secrets to SSRF, path traversal,
+      weak crypto, supply-chain freshness and suspicious vendor autoloads — with a single Artisan command.
     </p>
 
     <div class="hero-actions">
@@ -798,13 +798,17 @@
         <div class="t-detail">✗ app/Http/Controllers/DownloadController.php:24 — Storage::get($request-&gt;path) <span
             style="color:var(--blue)">[7b6a5f4e3d2c]</span></div>
         <br />
+        <div><span class="t-warn"> WARN</span> <span class="t-cmd">Suspicious Vendor Autoload</span></div>
+        <div class="t-detail">⚑ vendor/acme/helpers registers PHP via autoload.files (not in whitelist). <span
+            style="color:var(--blue)">[3e2d1c0b9a8f]</span></div>
+        <br />
         <div><span class="t-warn"> WARN</span> <span class="t-cmd">Environment Configuration</span></div>
         <div class="t-detail">⚑ APP_DEBUG is true — stack traces exposed to end users. <span
             style="color:var(--blue)">[5c4b3a2d1e0f]</span></div>
         <br />
         <div><span class="t-muted"> ─────────────────────────────────────────────────────</span></div>
-        <div> <span class="t-summary">Summary</span> <span class="t-pass">19 passed</span> <span class="t-warn">4
-            warning(s)</span> <span class="t-fail">2 failed</span> <span class="t-muted">(25 checks total)</span></div>
+        <div> <span class="t-summary">Summary</span> <span class="t-pass">19 passed</span> <span class="t-warn">5
+            warning(s)</span> <span class="t-fail">2 failed</span> <span class="t-muted">(26 checks total)</span></div>
         <br />
         <div> <span class="t-fail">Scan result: FAIL — fix the issues above before deploying.</span></div>
       </div>
@@ -815,7 +819,7 @@
   <div class="stats-bar">
     <div class="stats-inner">
       <div>
-        <div class="stat-num">25</div>
+        <div class="stat-num">26</div>
         <div class="stat-label">Security Checks</div>
       </div>
       <div>
@@ -836,7 +840,7 @@
   <!-- CHECKS -->
   <section id="checks">
     <div class="section-label">Vulnerability Coverage</div>
-    <h2 class="section-title">25 checks. Zero excuses.</h2>
+    <h2 class="section-title">26 checks. Zero excuses.</h2>
     <p class="section-sub">Every scan covers the OWASP Top 10, Laravel-specific pitfalls, and modern supply-chain risk —
       automatically.</p>
 
@@ -1086,6 +1090,17 @@
         <span class="sev sev-fail">FAIL/WARN</span>
       </div>
 
+      <div class="check-card">
+        <span class="check-num">26</span>
+        <div class="check-body">
+          <div class="check-name">Suspicious Vendor Autoload</div>
+          <div class="check-desc">Flags packages under vendor/ that register PHP via <code
+              style="font-family:var(--mono);color:var(--accent)">autoload.files</code> outside a baked-in whitelist —
+            the mechanism abused by the May 2026 Laravel-Lang supply-chain attack. Whitelist via config.</div>
+        </div>
+        <span class="sev sev-warn">WARN</span>
+      </div>
+
     </div>
   </section>
 
@@ -1245,6 +1260,24 @@
               onclick="navigator.clipboard.writeText('php artisan vendor:publish --tag=checkpoint-config'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
           </div>
           <pre><span class="cmd">php artisan</span> <span class="arg">vendor:publish</span> <span class="flag">--tag</span>=<span class="arg">checkpoint-config</span></pre>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🐳</div>
+        <div class="feature-title">Docker (recommended)</div>
+        <div class="feature-desc" style="margin-bottom:1rem">Run <code
+            style="font-family:var(--mono);color:var(--accent)">composer install</code>, <code
+            style="font-family:var(--mono);color:var(--accent)">npm install</code> and the scan <em>inside a
+              container</em> — never let untrusted post-install scripts touch your host. Checkpoint's CI scaffolds
+          already mirror this pattern.</div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn"
+              onclick="navigator.clipboard.writeText('docker compose exec app php artisan checkpoint:scan'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+          </div>
+          <pre><span class="cmd">docker compose exec</span> <span class="arg">app</span> <span class="cmd">php artisan</span> <span class="arg">checkpoint:scan</span></pre>
         </div>
       </div>
 
