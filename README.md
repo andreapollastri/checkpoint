@@ -49,7 +49,7 @@ php artisan checkpoint:scan
 
 ## Requirements
 
-- **PHP** `^8.1` (see [Framework support](#framework-support) for how your Laravel version may raise the floor)
+- **PHP** `^8.1` is the package floor. Newer Laravel versions may require a higher PHP, so your effective minimum is whatever your Laravel major demands.
 - **Laravel** `8`–`13` (same major as `illuminate/*` 8.x–13.x used by your app)
 
 ---
