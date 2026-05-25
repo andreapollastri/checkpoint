@@ -53,6 +53,7 @@ class PackageFreshnessCheck extends AbstractCheck
 
                 if (isset($whitelist[$name])) {
                     $skipped++;
+
                     continue;
                 }
 
