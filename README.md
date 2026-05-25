@@ -2,6 +2,12 @@
 
 > A Laravel security scanner that audits your application for common vulnerabilities — from known CVEs to hardcoded secrets — via a single Artisan command.
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/andreapollastri/checkpoint.svg?style=flat-square)](https://packagist.org/packages/andreapollastri/checkpoint)
+[![Tests](https://img.shields.io/github/actions/workflow/status/andreapollastri/checkpoint/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/andreapollastri/checkpoint/actions/workflows/run-tests.yml?query=branch%3Amain)
+[![PHPStan](https://img.shields.io/github/actions/workflow/status/andreapollastri/checkpoint/phpstan.yml?branch=main&label=phpstan&style=flat-square)](https://github.com/andreapollastri/checkpoint/actions/workflows/phpstan.yml?query=branch%3Amain)
+[![Code Style](https://img.shields.io/github/actions/workflow/status/andreapollastri/checkpoint/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/andreapollastri/checkpoint/actions/workflows/fix-php-code-style-issues.yml?query=branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/andreapollastri/checkpoint.svg?style=flat-square)](https://packagist.org/packages/andreapollastri/checkpoint)
+
 ```
 php artisan checkpoint:scan
 ```
