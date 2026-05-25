@@ -46,7 +46,7 @@ class NpmAuditCheck extends AbstractCheck
                 $high++;
             }
             if (in_array($severity, ['critical', 'high'], true)) {
-                $via = collect($vuln['via'] ?? [])->filter(fn ($v) => is_array($v))->first();
+                $via = collect((array) ($vuln['via'] ?? []))->filter(fn ($v) => is_array($v))->first();
                 $title = is_array($via) ? ($via['title'] ?? $name) : $name;
                 $details[] = "[{$severity}] {$name}: {$title}";
             }
