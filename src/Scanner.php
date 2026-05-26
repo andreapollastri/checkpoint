@@ -61,6 +61,7 @@ final class Scanner
                 $basePath,
                 (array) \config('checkpoint.suspicious_autoload.whitelist', []),
             ),
+            Checks\CompromisedDependencyCheck::class => fn () => new Checks\CompromisedDependencyCheck($basePath),
             Checks\SupplyChainToolingCheck::class => fn () => new Checks\SupplyChainToolingCheck($basePath),
             Checks\PathTraversalCheck::class => fn () => new Checks\PathTraversalCheck($basePath),
             Checks\WeakCryptographyCheck::class => fn () => new Checks\WeakCryptographyCheck($basePath),

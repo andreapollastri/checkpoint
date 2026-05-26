@@ -39,6 +39,7 @@ return [
         Checks\CorsConfigCheck::class => true,
         Checks\PackageFreshnessCheck::class => true,
         Checks\SuspiciousVendorAutoloadCheck::class => true,
+        Checks\CompromisedDependencyCheck::class => true,
         Checks\SupplyChainToolingCheck::class => true,
         Checks\PathTraversalCheck::class => true,
         Checks\WeakCryptographyCheck::class => true,
