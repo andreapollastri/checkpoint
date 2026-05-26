@@ -38,6 +38,7 @@ php artisan checkpoint:scan
 | 24  | **Session & Cookie Security** — audits `config/session.php` for `http_only=false`, `same_site=null/none`, `secure=false`, `encrypt=false`    | `WARN`          |
 | 25  | **EOL Versions** — flags Composer-locked Laravel and the running PHP when they are past or approaching upstream security cutoff              | `FAIL` / `WARN` |
 | 26  | **Suspicious Vendor Autoload** — flags packages under `vendor/` that register PHP via `autoload.files` outside a baked-in whitelist (the mechanism abused by the May 2026 Laravel-Lang supply-chain attack) | `WARN`          |
+| 27  | **Compromised Dependencies** — scans `vendor/` for known supply-chain compromise signatures (starting with the May 2026 Laravel-Lang / flipbox payload) | `FAIL`          |
 
 ---
 
