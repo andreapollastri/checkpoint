@@ -27,11 +27,11 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4', '8.5']
-        laravel: ['10.*', '11.*', '12.*', '13.*']
+        # Laravel 10 is supported at runtime but not tested here: the dev
+        # toolchain (Pest, Collision) requires Laravel 11 or newer.
+        laravel: ['11.*', '12.*', '13.*']
         stability: [prefer-stable]
         include:
-          - laravel: '10.*'
-            testbench: '8.*'
           - laravel: '11.*'
             testbench: '9.*'
           - laravel: '12.*'
@@ -39,11 +39,6 @@ jobs:
           - laravel: '13.*'
             testbench: '11.*'
         exclude:
-          # Laravel 10 supports PHP 8.1 to 8.3 only
-          - laravel: '10.*'
-            php: '8.4'
-          - laravel: '10.*'
-            php: '8.5'
           # Laravel 11 has no PHP 8.5 support
           - laravel: '11.*'
             php: '8.5'

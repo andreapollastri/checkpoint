@@ -52,6 +52,8 @@ php artisan checkpoint:scan
 - **PHP** `^8.2` (PHP 8.2 or higher)
 - **Laravel** `10` to `13` (matching the `illuminate/*` 10.x to 13.x your app uses)
 
+> Note: Laravel 10 is supported at runtime. The CI test matrix covers Laravel 11 to 13, because the package's own dev tooling (Pest, Collision) requires Laravel 11 or newer.
+
 ---
 
 ## Installation
