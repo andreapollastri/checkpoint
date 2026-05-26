@@ -476,6 +476,8 @@
       gap: 2rem;
       align-items: start;
     }
+    /* let grid columns shrink below content width so long commands scroll inside the pre, not the page */
+    .install-wrap > * { min-width: 0; }
 
     @media (max-width: 768px) {
       .install-wrap {
@@ -488,6 +490,7 @@
       border: 1px solid var(--border);
       border-radius: 10px;
       overflow: hidden;
+      min-width: 0;
     }
 
     .code-header {
