@@ -98,7 +98,7 @@ class SuspiciousVendorAutoloadCheck extends AbstractCheck
     }
 
     /**
-     * @return iterable<string, string>  vendor/package => absolute composer.json path
+     * @return iterable<string, string> vendor/package => absolute composer.json path
      */
     private function vendorComposerFiles(string $vendorPath): iterable
     {
