@@ -18,3 +18,11 @@ it('fails when a post form is missing the csrf directive', function () {
 
     expect((new CsrfCheck($base))->run()->status)->toBe(CheckResult::FAIL);
 });
+
+it('ignores livewire forms that submit via wire:submit', function () {
+    $base = tempProject([
+        'resources/views/contact.blade.php' => "<form method=\"POST\" wire:submit=\"save\"><input name=\"x\"></form>\n",
+    ]);
+
+    expect((new CsrfCheck($base))->run()->status)->toBe(CheckResult::PASS);
+});
