@@ -2,6 +2,12 @@
 
 > A Laravel security scanner that audits your application for common vulnerabilities — from known CVEs to hardcoded secrets — via a single Artisan command.
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/andreapollastri/checkpoint.svg?style=flat-square)](https://packagist.org/packages/andreapollastri/checkpoint)
+[![Tests](https://img.shields.io/github/actions/workflow/status/andreapollastri/checkpoint/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/andreapollastri/checkpoint/actions/workflows/run-tests.yml?query=branch%3Amain)
+[![PHPStan](https://img.shields.io/github/actions/workflow/status/andreapollastri/checkpoint/phpstan.yml?branch=main&label=phpstan&style=flat-square)](https://github.com/andreapollastri/checkpoint/actions/workflows/phpstan.yml?query=branch%3Amain)
+[![Code Style](https://img.shields.io/github/actions/workflow/status/andreapollastri/checkpoint/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/andreapollastri/checkpoint/actions/workflows/fix-php-code-style-issues.yml?query=branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/andreapollastri/checkpoint.svg?style=flat-square)](https://packagist.org/packages/andreapollastri/checkpoint)
+
 ```
 php artisan checkpoint:scan
 ```
@@ -19,13 +25,13 @@ php artisan checkpoint:scan
 | 5   | **File Permissions** — flags world-readable `.env` or world-writable `storage/`                                                | `WARN`          |
 | 6   | **Hardcoded Secrets** — scans PHP/JS files for API keys, Stripe tokens, AWS keys, GitHub PATs, PEM headers                     | `FAIL`          |
 | 7   | **SQL Injection Risks** — detects raw queries with variable interpolation (`DB::select("… $var")`, `->whereRaw(…)`)            | `FAIL`          |
-| 8   | **Mass Assignment** — finds `$guarded = []`, `Model::unguard()`, or models with no fillable/guarded definition                 | `WARN`          |
-| 9   | **XSS** — flags unescaped `{!! $var !!}` in Blade views and raw `echo` of request input                                        | `WARN`          |
+| 8   | **Mass Assignment Vulnerabilities** — finds `$guarded = []`, `Model::unguard()`, or models with no fillable/guarded definition                 | `WARN`          |
+| 9   | **XSS (Cross-Site Scripting) Risks** — flags unescaped `{!! $var !!}` in Blade views and raw `echo` of request input                                        | `WARN`          |
 | 10  | **CSRF Protection** — detects forms with `POST`/`PUT`/`PATCH`/`DELETE` missing `@csrf`, and checks middleware is present       | `FAIL`          |
-| 11  | **Open Redirect** — spots `redirect($request->…)` or `header('Location: ' . $var)` with unvalidated input                      | `WARN`          |
-| 12  | **Command Injection** — finds `exec`, `shell_exec`, `system`, `passthru`, `proc_open` called with unescaped variables          | `FAIL`          |
+| 11  | **Open Redirect Risks** — spots `redirect($request->…)` or `header('Location: ' . $var)` with unvalidated input                      | `WARN`          |
+| 12  | **Command Injection Risks** — finds `exec`, `shell_exec`, `system`, `passthru`, `proc_open` called with unescaped variables          | `FAIL`          |
 | 13  | **Insecure Deserialization** — detects `unserialize($userInput)` and the classic `unserialize(base64_decode(…))` exploit chain | `FAIL`          |
-| 14  | **Debug Functions in Production** — finds `var_dump`, `dd`, `dump`, `ray` left outside of test files                           | `WARN`          |
+| 14  | **Debug Functions in Production Code** — finds `var_dump`, `dd`, `dump`, `ray` left outside of test files                           | `WARN`          |
 | 15  | **Sensitive Data Exposure** — flags `display_errors = 1`, logging of passwords/tokens, and Telescope always-on config          | `WARN`          |
 | 16  | **SSRF Risks** — detects `Http::get($request->…)`, Guzzle/cURL/`file_get_contents` called with user-controlled URLs            | `FAIL`          |
 | 17  | **TLS Certificate Verification** — flags `withoutVerifying()`, `'verify' => false`, `CURLOPT_SSL_VERIFYPEER => false`          | `FAIL`          |
@@ -43,7 +49,7 @@ php artisan checkpoint:scan
 
 ## Requirements
 
-- **PHP** `^8.1` (see [Framework support](#framework-support) for how your Laravel version may raise the floor)
+- **PHP** `^8.1` is the package floor. Newer Laravel versions may require a higher PHP, so your effective minimum is whatever your Laravel major demands.
 - **Laravel** `8`–`13` (same major as `illuminate/*` 8.x–13.x used by your app)
 
 ---
