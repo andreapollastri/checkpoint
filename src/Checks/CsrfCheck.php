@@ -32,12 +32,24 @@ class CsrfCheck extends AbstractCheck
 
             // Find forms with a mutable HTTP method that lack a CSRF token
             if (preg_match_all('/<form\b[^>]*method=["\'](?:POST|PUT|PATCH|DELETE)["\'][^>]*>/i', $content, $matches)) {
+                // Livewire-driven forms (wire:submit) don't perform a classic HTTP POST —
+                // Livewire sends an AJAX request guarded by its own CSRF token, so @csrf is
+                // not expected on them. Exclude these to avoid false positives (e.g. Filament).
+                $httpForms = array_filter(
+                    $matches[0],
+                    static fn (string $formTag): bool => ! preg_match('/\bwire:submit\b/i', $formTag)
+                );
+
+                if ($httpForms === []) {
+                    continue;
+                }
+
                 $hasCsrf = str_contains($content, '@csrf')
                     || str_contains($content, 'csrf_field()')
                     || str_contains($content, 'csrf_token()');
 
                 if (! $hasCsrf) {
-                    $findings[] = "{$relative}: ".count($matches[0])." form(s) with POST/PUT/PATCH/DELETE but no @csrf directive.";
+                    $findings[] = "{$relative}: ".count($httpForms)." form(s) with POST/PUT/PATCH/DELETE but no @csrf directive.";
                 }
             }
         }
