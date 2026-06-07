@@ -2,21 +2,13 @@
 
 namespace Checkpoint\Checks;
 
+use Checkpoint\ScanPaths;
 use Symfony\Component\Finder\Finder;
 
 class DebugFunctionsCheck extends AbstractCheck
 {
     private const DEBUG_FUNCTIONS = [
         'var_dump', 'print_r', 'var_export', 'dd', 'dump', 'ray', 'rdump',
-    ];
-
-    private const EXCLUDE_PATHS = [
-        'vendor',
-        'node_modules',
-        'storage',
-        'bootstrap/cache',
-        '.git',
-        'tests',
     ];
 
     public function __construct(private readonly string $basePath) {}
@@ -28,11 +20,10 @@ class DebugFunctionsCheck extends AbstractCheck
 
     public function run(): CheckResult
     {
-        $finder = new Finder();
+        $finder = ScanPaths::configure(new Finder(), ScanPaths::WITH_TESTS);
         $finder->files()
             ->in($this->basePath)
-            ->name('*.php')
-            ->notPath(self::EXCLUDE_PATHS);
+            ->name('*.php');
 
         $findings = [];
         $fnPattern = implode('|', self::DEBUG_FUNCTIONS);

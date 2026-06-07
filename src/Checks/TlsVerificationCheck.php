@@ -2,19 +2,11 @@
 
 namespace Checkpoint\Checks;
 
+use Checkpoint\ScanPaths;
 use Symfony\Component\Finder\Finder;
 
 class TlsVerificationCheck extends AbstractCheck
 {
-    private const EXCLUDE_PATHS = [
-        'vendor',
-        'node_modules',
-        'storage',
-        'bootstrap/cache',
-        '.git',
-        'tests',
-    ];
-
     public function __construct(private readonly string $basePath) {}
 
     public function name(): string
@@ -24,11 +16,10 @@ class TlsVerificationCheck extends AbstractCheck
 
     public function run(): CheckResult
     {
-        $finder = new Finder();
+        $finder = ScanPaths::configure(new Finder(), ScanPaths::WITH_TESTS);
         $finder->files()
             ->in($this->basePath)
-            ->name('*.php')
-            ->notPath(self::EXCLUDE_PATHS);
+            ->name('*.php');
 
         $findings = [];
 

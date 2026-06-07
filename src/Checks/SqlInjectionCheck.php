@@ -2,6 +2,7 @@
 
 namespace Checkpoint\Checks;
 
+use Checkpoint\ScanPaths;
 use Symfony\Component\Finder\Finder;
 
 class SqlInjectionCheck extends AbstractCheck
@@ -22,14 +23,6 @@ class SqlInjectionCheck extends AbstractCheck
         '/sprintf\s*\(\s*["\'](?:SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)\b/i',
     ];
 
-    private const EXCLUDE_PATHS = [
-        'vendor',
-        'node_modules',
-        'storage',
-        'bootstrap/cache',
-        '.git',
-    ];
-
     public function __construct(private readonly string $basePath) {}
 
     public function name(): string
@@ -39,11 +32,10 @@ class SqlInjectionCheck extends AbstractCheck
 
     public function run(): CheckResult
     {
-        $finder = new Finder();
+        $finder = ScanPaths::configure(new Finder());
         $finder->files()
             ->in($this->basePath)
-            ->name('*.php')
-            ->notPath(self::EXCLUDE_PATHS);
+            ->name('*.php');
 
         $findings = [];
 

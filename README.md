@@ -195,6 +195,19 @@ The hash is content-stable: refactors that only shift line numbers within the sa
 
 > The `--only` / `--skip` CLI flags still work and override the config for the current run, which is handy for ad-hoc scans without editing the config.
 
+### Excluding folders from file scans
+
+File-based checks (Hardcoded Secrets, SQL Injection, XSS, and others) skip built-in paths such as `vendor/`, `node_modules/`, and `storage/`. Add your own paths when you have mounted data directories or other folders that are not part of your application source:
+
+```php
+'exclude_paths' => [
+    'storage/app/mounted-data',
+    'data/external',
+],
+```
+
+Paths are relative to the project root. Leading and trailing slashes are optional. Unreadable directories are skipped automatically so permission errors on mounted volumes do not abort the scan.
+
 ---
 
 ## Example output

@@ -2,6 +2,7 @@
 
 namespace Checkpoint\Checks;
 
+use Checkpoint\ScanPaths;
 use Symfony\Component\Finder\Finder;
 
 class HardcodedSecretsCheck extends AbstractCheck
@@ -101,15 +102,6 @@ class HardcodedSecretsCheck extends AbstractCheck
         '/"private_key"\s*:\s*"-----BEGIN/',
     ];
 
-    private const EXCLUDE_PATHS = [
-        'vendor',
-        'node_modules',
-        'storage',
-        'bootstrap/cache',
-        '.git',
-        'tests',
-    ];
-
     // Files under these paths contain intentionally fake/placeholder values
     private const LANG_ROOTS = [
         'lang/',
@@ -136,11 +128,10 @@ class HardcodedSecretsCheck extends AbstractCheck
 
     public function run(): CheckResult
     {
-        $finder = new Finder();
+        $finder = ScanPaths::configure(new Finder(), ScanPaths::WITH_TESTS);
         $finder->files()
             ->in($this->basePath)
             ->name(['*.php', '*.js', '*.ts', '.env.example'])
-            ->notPath(self::EXCLUDE_PATHS)
             ->notName('.env');
 
         // FAIL-level: real source code with hardcoded secrets

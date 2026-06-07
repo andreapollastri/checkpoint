@@ -2,18 +2,11 @@
 
 namespace Checkpoint\Checks;
 
+use Checkpoint\ScanPaths;
 use Symfony\Component\Finder\Finder;
 
 class XssCheck extends AbstractCheck
 {
-    private const EXCLUDE_PATHS = [
-        'vendor',
-        'node_modules',
-        'storage',
-        'bootstrap/cache',
-        '.git',
-    ];
-
     // Variables that are always safe to output unescaped in Blade
     private const SAFE_UNESCAPED_VARS = ['slot', 'loop', '__env', 'errors'];
 
@@ -54,11 +47,10 @@ class XssCheck extends AbstractCheck
         }
 
         // Also check PHP files for raw echo of request data
-        $phpFinder = new Finder();
+        $phpFinder = ScanPaths::configure(new Finder());
         $phpFinder->files()
             ->in($this->basePath)
-            ->name('*.php')
-            ->notPath(self::EXCLUDE_PATHS);
+            ->name('*.php');
 
         foreach ($phpFinder as $file) {
             $lines = explode("\n", $file->getContents());

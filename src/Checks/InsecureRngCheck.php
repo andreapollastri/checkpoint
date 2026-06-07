@@ -2,19 +2,11 @@
 
 namespace Checkpoint\Checks;
 
+use Checkpoint\ScanPaths;
 use Symfony\Component\Finder\Finder;
 
 class InsecureRngCheck extends AbstractCheck
 {
-    private const EXCLUDE_PATHS = [
-        'vendor',
-        'node_modules',
-        'storage',
-        'bootstrap/cache',
-        '.git',
-        'tests',
-    ];
-
     private const SECURITY_KEYWORDS = 'token|secret|reset|csrf|nonce|salt|password|verifier|api_?key|otp|2fa|confirmation';
 
     public function __construct(private readonly string $basePath) {}
@@ -26,11 +18,10 @@ class InsecureRngCheck extends AbstractCheck
 
     public function run(): CheckResult
     {
-        $finder = new Finder();
+        $finder = ScanPaths::configure(new Finder(), ScanPaths::WITH_TESTS);
         $finder->files()
             ->in($this->basePath)
-            ->name('*.php')
-            ->notPath(self::EXCLUDE_PATHS);
+            ->name('*.php');
 
         $findings = [];
 

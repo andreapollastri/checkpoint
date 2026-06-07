@@ -118,4 +118,23 @@ return [
         // 'a1b2c3d4e5f6',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Excluded Scan Paths
+    |--------------------------------------------------------------------------
+    |
+    | Paths relative to the project root that file-based checks should skip.
+    | Useful for mounted data directories or folders with different ownership
+    | that are not part of your application source.
+    |
+    | Built-in exclusions (vendor/, node_modules/, storage/, …) always apply;
+    | entries here are merged on top of those defaults.
+    |
+    */
+
+    'exclude_paths' => [
+        // 'storage/app/mounted-data',
+        // 'data/external',
+    ],
+
 ];

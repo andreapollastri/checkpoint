@@ -2,19 +2,11 @@
 
 namespace Checkpoint\Checks;
 
+use Checkpoint\ScanPaths;
 use Symfony\Component\Finder\Finder;
 
 class SensitiveExposureCheck extends AbstractCheck
 {
-    private const EXCLUDE_PATHS = [
-        'vendor',
-        'node_modules',
-        'storage',
-        'bootstrap/cache',
-        '.git',
-        'tests',
-    ];
-
     public function __construct(private readonly string $basePath) {}
 
     public function name(): string
@@ -27,11 +19,10 @@ class SensitiveExposureCheck extends AbstractCheck
         $findings = [];
 
         // Check that error reporting is suppressed
-        $finder = new Finder();
+        $finder = ScanPaths::configure(new Finder(), ScanPaths::WITH_TESTS);
         $finder->files()
             ->in($this->basePath)
-            ->name('*.php')
-            ->notPath(self::EXCLUDE_PATHS);
+            ->name('*.php');
 
         foreach ($finder as $file) {
             $lines = explode("\n", $file->getContents());

@@ -2,20 +2,13 @@
 
 namespace Checkpoint\Checks;
 
+use Checkpoint\ScanPaths;
 use Symfony\Component\Finder\Finder;
 
 class CommandInjectionCheck extends AbstractCheck
 {
     private const DANGEROUS_FUNCTIONS = [
         'exec', 'shell_exec', 'system', 'passthru', 'proc_open', 'popen',
-    ];
-
-    private const EXCLUDE_PATHS = [
-        'vendor',
-        'node_modules',
-        'storage',
-        'bootstrap/cache',
-        '.git',
     ];
 
     public function __construct(private readonly string $basePath) {}
@@ -27,11 +20,10 @@ class CommandInjectionCheck extends AbstractCheck
 
     public function run(): CheckResult
     {
-        $finder = new Finder();
+        $finder = ScanPaths::configure(new Finder());
         $finder->files()
             ->in($this->basePath)
-            ->name('*.php')
-            ->notPath(self::EXCLUDE_PATHS);
+            ->name('*.php');
 
         $findings = [];
 
