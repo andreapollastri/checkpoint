@@ -175,7 +175,7 @@ class HardcodedSecretsCheck extends AbstractCheck
                         }
                     }
 
-                    if (! $isSafe && $this->isLaravelPasswordHashedCast($line)) {
+                    if (! $isSafe && $this->isLaravelCast($line)) {
                         $isSafe = true;
                     }
 
@@ -240,12 +240,56 @@ class HardcodedSecretsCheck extends AbstractCheck
         return str_starts_with($relativePath, self::DATABASE_ROOT);
     }
 
-    /**
-     * Laravel 11+ password cast: 'password' => 'hashed' in casts() — not a secret.
-     */
-    private function isLaravelPasswordHashedCast(string $line): bool
+    private function isLaravelCast(string $line): bool
     {
-        return (bool) preg_match('/[\'"]password[\'"]\s*=>\s*[\'"]hashed[\'"]/i', $line);
+        // All Laravel cast types from the documentation
+        // https://laravel.com/docs/13.x/eloquent-mutators#attribute-casting
+        $castTypes = [
+            'array',
+            'AsStringable',
+            'AsUri',
+            'AsArrayObject',
+            'AsCollection',
+            'AsEnumArrayObject',
+            'AsEnumCollection',
+            'AsBinary',
+            'AsEncryptedArrayObject',
+            'AsEncryptedCollection',
+            'AsFluentAttribute',
+            'AsFluentClass',
+            'AsFluentMethod',
+            'AsFluent',
+            'string',
+            'integer',
+            'float',
+            'double',
+            'real',
+            'boolean',
+            'object',
+            'json',
+            'collection',
+            'date',
+            'datetime',
+            'immutable_date',
+            'immutable_datetime',
+            'timestamp',
+            'hashed',
+            'encrypted',
+            'encrypted:array',
+            'encrypted:collection',
+            'encrypted:object',
+            'decimal',
+            'model',
+            'custom',
+        ];
+
+        $castPattern = implode('|', array_map('preg_quote', $castTypes));
+        $classPattern = '[a-zA-Z0-9\\\:_-]+::?class';
+
+        return (bool) preg_match(
+            "/=>\s*[\"'](?:{$castPattern})(?:[:][^\"']*)?[\"']|[\"']{$classPattern}[\"']/i",
+            $line
+        );
     }
 
     private function isValidationRule(string $line): bool
