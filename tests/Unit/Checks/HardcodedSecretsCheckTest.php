@@ -122,6 +122,20 @@ class HardcodedSecretsCheckTest extends TestCase
         $this->assertSame(CheckResult::PASS, $result->status);
     }
 
+    public function test_casts_as_encrypted_array(): void
+    {
+        $workspace = $this->makeWorkspace();
+        $this->writeFile(
+            $workspace,
+            'app/Config.php',
+            "<?php\nreturn ['api_key' => 'encrypted:array'];\n",
+        );
+
+        $result = (new HardcodedSecretsCheck($workspace))->run();
+
+        $this->assertSame(CheckResult::PASS, $result->status);
+    }
+
     public function test_casts_as_stringable_class(): void
     {
         $workspace = $this->makeWorkspace();
