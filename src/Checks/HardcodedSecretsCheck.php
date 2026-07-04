@@ -175,7 +175,7 @@ class HardcodedSecretsCheck extends AbstractCheck
                         }
                     }
 
-                    if (! $isSafe && $this->isLaravelPasswordHashedCast($line)) {
+                    if (! $isSafe && $this->isHashedOrEncryptedCast($line)) {
                         $isSafe = true;
                     }
 
@@ -241,11 +241,22 @@ class HardcodedSecretsCheck extends AbstractCheck
     }
 
     /**
-     * Laravel 11+ password cast: 'password' => 'hashed' in casts() — not a secret.
+     * Casts that protect the value at rest ('hashed', 'encrypted', 'encrypted:*',
+     * or an AsEncrypted* cast class) — the "value" is a cast name, not a secret.
+     * Other casts ('string', 'array', …) would mask a real literal, so they
+     * don't suppress the finding.
      */
-    private function isLaravelPasswordHashedCast(string $line): bool
+    private function isHashedOrEncryptedCast(string $line): bool
     {
-        return (bool) preg_match('/[\'"]password[\'"]\s*=>\s*[\'"]hashed[\'"]/i', $line);
+        if (preg_match('/=>\s*["\'](?:hashed|encrypted(?::[a-z_]+)?)["\']/i', $line)) {
+            return true;
+        }
+
+        // 'meta' => AsEncryptedArrayObject::class — bare constant, optionally fully qualified
+        return (bool) preg_match(
+            '/=>\s*\\\\?(?:[A-Za-z_][A-Za-z0-9_]*\\\\)*AsEncrypted[A-Za-z0-9_]*::class\b/',
+            $line
+        );
     }
 
     private function isValidationRule(string $line): bool
