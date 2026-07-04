@@ -5,7 +5,7 @@ namespace Checkpoint\Tests\Unit\Checks;
 use Checkpoint\Checks\CheckResult;
 use Checkpoint\Checks\HardcodedSecretsCheck;
 use Checkpoint\Tests\TestCase;
-use Illuminate\Database\Eloquent\Casts\AsStringable;
+use ReflectionMethod;
 
 class HardcodedSecretsCheckTest extends TestCase
 {
@@ -108,13 +108,13 @@ class HardcodedSecretsCheckTest extends TestCase
         $this->assertSame('Hardcoded Secrets', (new HardcodedSecretsCheck($this->makeWorkspace()))->name());
     }
 
-    public function test_casts_as_encrypted(): void
+    public function test_allows_a_hashed_password_cast(): void
     {
         $workspace = $this->makeWorkspace();
         $this->writeFile(
             $workspace,
-            'app/Config.php',
-            "<?php\nreturn ['api_key' => 'encrypted'];\n",
+            'app/Models/User.php',
+            "<?php\nclass User {\n    protected \$casts = ['password' => 'hashed'];\n}\n",
         );
 
         $result = (new HardcodedSecretsCheck($workspace))->run();
@@ -122,13 +122,13 @@ class HardcodedSecretsCheckTest extends TestCase
         $this->assertSame(CheckResult::PASS, $result->status);
     }
 
-    public function test_casts_as_encrypted_array(): void
+    public function test_allows_an_encrypted_cast(): void
     {
         $workspace = $this->makeWorkspace();
         $this->writeFile(
             $workspace,
-            'app/Config.php',
-            "<?php\nreturn ['api_key' => 'encrypted:array'];\n",
+            'app/Models/Integration.php',
+            "<?php\nclass Integration {\n    protected \$casts = ['api_key' => 'encrypted'];\n}\n",
         );
 
         $result = (new HardcodedSecretsCheck($workspace))->run();
@@ -136,17 +136,60 @@ class HardcodedSecretsCheckTest extends TestCase
         $this->assertSame(CheckResult::PASS, $result->status);
     }
 
-    public function test_casts_as_stringable_class(): void
+    public function test_allows_an_encrypted_variant_cast(): void
     {
         $workspace = $this->makeWorkspace();
         $this->writeFile(
             $workspace,
-            'app/Config.php',
-            "<?php\nreturn ['api_key' => {" . AsStringable::class . "}];\n",
+            'app/Models/Integration.php',
+            "<?php\nclass Integration {\n    protected \$casts = ['token' => 'encrypted:array'];\n}\n",
         );
 
         $result = (new HardcodedSecretsCheck($workspace))->run();
 
         $this->assertSame(CheckResult::PASS, $result->status);
+    }
+
+    public function test_flags_casts_that_do_not_protect_the_value(): void
+    {
+        $workspace = $this->makeWorkspace();
+        $this->writeFile(
+            $workspace,
+            'app/Models/Integration.php',
+            "<?php\nclass Integration {\n    protected \$casts = ['api_key' => 'array'];\n}\n",
+        );
+
+        $result = (new HardcodedSecretsCheck($workspace))->run();
+
+        $this->assertSame(CheckResult::FAIL, $result->status);
+    }
+
+    public function test_cast_matcher_accepts_only_hashed_and_encrypted_casts(): void
+    {
+        $expectations = [
+            "'password' => 'hashed'," => true,
+            "'api_key' => 'encrypted'," => true,
+            "'token' => 'encrypted:collection'," => true,
+            "'secrets' => AsEncryptedCollection::class," => true,
+            "'secrets' => \\Illuminate\\Database\\Eloquent\\Casts\\AsEncryptedArrayObject::class," => true,
+            "'name' => 'string'," => false,
+            "'settings' => 'array'," => false,
+            "'meta' => AsStringable::class," => false,
+            // Quoted string values must not be mistaken for a cast class constant
+            "'token' => 'AsEncryptedCollection::class'," => false,
+            // The cast name must be the whole quoted value
+            "'password' => 'hashed_secret_123'," => false,
+        ];
+
+        $matcher = new ReflectionMethod(HardcodedSecretsCheck::class, 'isHashedOrEncryptedCast');
+        $check = new HardcodedSecretsCheck($this->makeWorkspace());
+
+        foreach ($expectations as $line => $expected) {
+            $this->assertSame(
+                $expected,
+                $matcher->invoke($check, $line),
+                "Unexpected cast match result for line: {$line}",
+            );
+        }
     }
 }

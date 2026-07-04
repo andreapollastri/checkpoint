@@ -175,7 +175,7 @@ class HardcodedSecretsCheck extends AbstractCheck
                         }
                     }
 
-                    if (! $isSafe && $this->isLaravelCast($line)) {
+                    if (! $isSafe && $this->isHashedOrEncryptedCast($line)) {
                         $isSafe = true;
                     }
 
@@ -240,54 +240,21 @@ class HardcodedSecretsCheck extends AbstractCheck
         return str_starts_with($relativePath, self::DATABASE_ROOT);
     }
 
-    private function isLaravelCast(string $line): bool
+    /**
+     * Casts that protect the value at rest ('hashed', 'encrypted', 'encrypted:*',
+     * or an AsEncrypted* cast class) — the "value" is a cast name, not a secret.
+     * Other casts ('string', 'array', …) would mask a real literal, so they
+     * don't suppress the finding.
+     */
+    private function isHashedOrEncryptedCast(string $line): bool
     {
-        // All Laravel cast types from the documentation
-        // https://laravel.com/docs/13.x/eloquent-mutators#attribute-casting
-        $castTypes = [
-            'array',
-            'AsStringable',
-            'AsUri',
-            'AsArrayObject',
-            'AsCollection',
-            'AsEnumArrayObject',
-            'AsEnumCollection',
-            'AsBinary',
-            'AsEncryptedArrayObject',
-            'AsEncryptedCollection',
-            'AsFluentAttribute',
-            'AsFluentClass',
-            'AsFluentMethod',
-            'AsFluent',
-            'string',
-            'integer',
-            'float',
-            'double',
-            'real',
-            'boolean',
-            'object',
-            'json',
-            'collection',
-            'date',
-            'datetime',
-            'immutable_date',
-            'immutable_datetime',
-            'timestamp',
-            'hashed',
-            'encrypted',
-            'encrypted:array',
-            'encrypted:collection',
-            'encrypted:object',
-            'decimal',
-            'model',
-            'custom',
-        ];
+        if (preg_match('/=>\s*["\'](?:hashed|encrypted(?::[a-z_]+)?)["\']/i', $line)) {
+            return true;
+        }
 
-        $castPattern = implode('|', array_map('preg_quote', $castTypes));
-        $classPattern = '[a-zA-Z0-9\\\:_-]+::?class';
-
+        // 'meta' => AsEncryptedArrayObject::class — bare constant, optionally fully qualified
         return (bool) preg_match(
-            "/=>\s*[\"'](?:{$castPattern})(?:[:][^\"']*)?[\"']|[\"']{$classPattern}[\"']/i",
+            '/=>\s*\\\\?(?:[A-Za-z_][A-Za-z0-9_]*\\\\)*AsEncrypted[A-Za-z0-9_]*::class\b/',
             $line
         );
     }
