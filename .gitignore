@@ -13,6 +13,7 @@
 .clover
 .php-cs-fixer.cache
 .phpcs-cache
+.phpunit.cache
 
 # IDE & OS
 .DS_Store
