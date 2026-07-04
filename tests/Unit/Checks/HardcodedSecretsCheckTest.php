@@ -5,6 +5,7 @@ namespace Checkpoint\Tests\Unit\Checks;
 use Checkpoint\Checks\CheckResult;
 use Checkpoint\Checks\HardcodedSecretsCheck;
 use Checkpoint\Tests\TestCase;
+use Illuminate\Database\Eloquent\Casts\AsStringable;
 
 class HardcodedSecretsCheckTest extends TestCase
 {
@@ -105,5 +106,33 @@ class HardcodedSecretsCheckTest extends TestCase
     public function test_name_is_stable(): void
     {
         $this->assertSame('Hardcoded Secrets', (new HardcodedSecretsCheck($this->makeWorkspace()))->name());
+    }
+
+    public function test_casts_as_encrypted(): void
+    {
+        $workspace = $this->makeWorkspace();
+        $this->writeFile(
+            $workspace,
+            'app/Config.php',
+            "<?php\nreturn ['api_key' => 'encrypted'];\n",
+        );
+
+        $result = (new HardcodedSecretsCheck($workspace))->run();
+
+        $this->assertSame(CheckResult::PASS, $result->status);
+    }
+
+    public function test_casts_as_stringable_class(): void
+    {
+        $workspace = $this->makeWorkspace();
+        $this->writeFile(
+            $workspace,
+            'app/Config.php',
+            "<?php\nreturn ['api_key' => {" . AsStringable::class . "}];\n",
+        );
+
+        $result = (new HardcodedSecretsCheck($workspace))->run();
+
+        $this->assertSame(CheckResult::PASS, $result->status);
     }
 }
