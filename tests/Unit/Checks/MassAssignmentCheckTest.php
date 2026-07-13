@@ -14,7 +14,17 @@ class MassAssignmentCheckTest extends TestCase
         $this->writeFile(
             $workspace,
             'app/Models/BaseModel.php',
-            "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Database\\Eloquent\\Model;\n\nabstract class BaseModel extends Model\n{\n}\n",
+            <<<'PHP'
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+abstract class BaseModel extends Model
+{
+}
+PHP,
         );
 
         $result = (new MassAssignmentCheck($workspace))->run();
@@ -28,7 +38,17 @@ class MassAssignmentCheckTest extends TestCase
         $this->writeFile(
             $workspace,
             'app/Models/User.php',
-            "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Database\\Eloquent\\Model;\n\nclass User extends Model\n{\n}\n",
+            <<<'PHP'
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+}
+PHP,
         );
 
         $result = (new MassAssignmentCheck($workspace))->run();
@@ -42,7 +62,18 @@ class MassAssignmentCheckTest extends TestCase
         $this->writeFile(
             $workspace,
             'app/Models/User.php',
-            "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Database\\Eloquent\\Model;\n\nclass User extends Model\n{\n    protected \$guarded = [];\n}\n",
+            <<<'PHP'
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+    protected $guarded = [];
+}
+PHP,
         );
 
         $result = (new MassAssignmentCheck($workspace))->run();
