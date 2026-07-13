@@ -476,8 +476,11 @@
       gap: 2rem;
       align-items: start;
     }
+
     /* let grid columns shrink below content width so long commands scroll inside the pre, not the page */
-    .install-wrap > * { min-width: 0; }
+    .install-wrap>* {
+      min-width: 0;
+    }
 
     @media (max-width: 768px) {
       .install-wrap {
@@ -1272,7 +1275,7 @@
         <div class="feature-desc" style="margin-bottom:1rem">Run <code
             style="font-family:var(--mono);color:var(--accent)">composer install</code>, <code
             style="font-family:var(--mono);color:var(--accent)">npm install</code> and the scan <em>inside a
-              container</em> — never let untrusted post-install scripts touch your host. Checkpoint's CI scaffolds
+            container</em> — never let untrusted post-install scripts touch your host. Checkpoint's CI scaffolds
           already mirror this pattern.</div>
         <div class="code-block">
           <div class="code-header">
@@ -1394,6 +1397,9 @@
     </div>
   </footer>
 
+  <script async src="https://stats.web.ap.it/i/2e869bda-e245-41d3-9d90-d6fa82116ebd.js"></script>
+  <noscript><img src="https://stats.web.ap.it/collect/pixel.gif?k=2e869bda-e245-41d3-9d90-d6fa82116ebd&p=/" width="1"
+      height="1" /></noscript>
 </body>
 
 </html>
