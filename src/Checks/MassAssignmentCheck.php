@@ -37,9 +37,16 @@ class MassAssignmentCheck extends AbstractCheck
 
             $relative = ltrim(str_replace($this->basePath, '', $file->getRealPath()), '/');
 
-            // $guarded = [] disables ALL protection
+            // Models that define neither $fillable nor $guarded are NOT flagged:
+            // Eloquent defaults to $guarded = ['*'], so every attribute is
+            // protected until the developer explicitly opts out.
+
+            // $guarded = [] disables ALL protection; in an abstract base model
+            // the empty array is inherited by every child model.
             if (preg_match('/\$guarded\s*=\s*\[\s*\]/', $content)) {
-                $findings[] = "{$relative}: \$guarded = [] — every attribute is mass-assignable.";
+                $findings[] = preg_match('/\babstract\s+class\b/', $content)
+                    ? "{$relative}: \$guarded = [] in abstract model — every attribute of its child models is mass-assignable."
+                    : "{$relative}: \$guarded = [] — every attribute is mass-assignable.";
                 continue;
             }
 
