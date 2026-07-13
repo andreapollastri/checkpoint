@@ -35,6 +35,10 @@ class MassAssignmentCheck extends AbstractCheck
                 continue;
             }
 
+            if (preg_match('/\babstract\s+class\b/', $content)) {
+                continue;
+            }
+
             $relative = ltrim(str_replace($this->basePath, '', $file->getRealPath()), '/');
 
             // $guarded = [] disables ALL protection
@@ -49,13 +53,6 @@ class MassAssignmentCheck extends AbstractCheck
                 continue;
             }
 
-            // Neither $fillable nor $guarded defined
-            $hasFillable = (bool) preg_match('/(?:\$fillable\s*=|#\[Fillable\b)/', $content);
-            $hasGuarded = (bool) preg_match('/(?:\$guarded\s*=|#\[Guarded\b)/', $content);
-
-            if (! $hasFillable && ! $hasGuarded) {
-                $findings[] = "{$relative}: Model has neither \$fillable nor \$guarded — all attributes are unprotected.";
-            }
         }
 
         if (empty($findings)) {
