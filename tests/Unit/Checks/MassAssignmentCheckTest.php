@@ -56,6 +56,32 @@ PHP,
         $this->assertSame(CheckResult::PASS, $result->status);
     }
 
+    public function test_warns_when_abstract_model_disables_guarding(): void
+    {
+        $workspace = $this->makeWorkspace();
+        $this->writeFile(
+            $workspace,
+            'app/Models/BaseModel.php',
+            <<<'PHP'
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+abstract class BaseModel extends Model
+{
+    protected $guarded = [];
+}
+PHP,
+        );
+
+        $result = (new MassAssignmentCheck($workspace))->run();
+
+        $this->assertSame(CheckResult::WARN, $result->status);
+        $this->assertStringContainsString('$guarded = []', $result->details[0]);
+    }
+
     public function test_warns_when_guarded_is_explicitly_empty(): void
     {
         $workspace = $this->makeWorkspace();

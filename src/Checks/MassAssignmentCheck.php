@@ -35,10 +35,6 @@ class MassAssignmentCheck extends AbstractCheck
                 continue;
             }
 
-            if (preg_match('/\babstract\s+class\b/', $content)) {
-                continue;
-            }
-
             $relative = ltrim(str_replace($this->basePath, '', $file->getRealPath()), '/');
 
             // $guarded = [] disables ALL protection
