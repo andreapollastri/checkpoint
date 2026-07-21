@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — Checkpoint</title>
+  <meta name="description" content="Page not found. Return to Checkpoint docs." />
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#c41e3a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #14181f;
+      --ink-soft: #2a3140;
+      --muted: #5e6775;
+      --line: #c9d0da;
+      --paper: #eef1f5;
+      --surface: #f7f8fa;
+      --white: #ffffff;
+      --signal: #c41e3a;
+      --signal-deep: #9b1630;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+      --sans: "Source Sans 3", Georgia, sans-serif;
+      --display: "Syne", var(--sans);
+      --max: 1120px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.55;
+      font-size: 1.0625rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    code,
+    pre {
+      font-family: var(--mono);
+    }
+
+    .scan-field {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(196, 30, 58, 0.1), transparent 55%),
+        radial-gradient(ellipse 50% 40% at 90% 30%, rgba(42, 49, 64, 0.06), transparent 50%),
+        linear-gradient(180deg, var(--surface) 0%, var(--paper) 40%, var(--paper) 100%);
+    }
+
+    .scan-field::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(20, 24, 31, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20, 24, 31, 0.035) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: linear-gradient(180deg, #000 0%, transparent 70%);
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1.5rem;
+      background: rgba(247, 248, 250, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav-brand {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: -0.03em;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .nav-brand span {
+      color: var(--signal);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--ink-soft);
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--signal);
+    }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.45rem 0.85rem;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: var(--white) !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .nav-cta:hover {
+      background: var(--signal);
+      border-color: var(--signal);
+    }
+
+    /* Hero — same stacked pattern as home */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3.5rem 0 0;
+    }
+
+    .hero-copy {
+      width: 100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 1.5rem 2.5rem;
+    }
+
+    .hero-code {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--signal);
+      margin-bottom: 0.85rem;
+      animation: rise 0.7s ease both;
+    }
+
+    .hero-brand {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(2.75rem, 8vw, 4.75rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--ink);
+      animation: rise 0.7s ease both;
+    }
+
+    .hero-brand em {
+      font-style: normal;
+      color: var(--signal);
+    }
+
+    .hero-copy h1 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: clamp(1.45rem, 3.2vw, 2rem);
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      margin: 1.1rem 0 0.7rem;
+      max-width: none;
+      animation: rise 0.7s 0.08s ease both;
+    }
+
+    .hero-copy > p {
+      color: var(--muted);
+      max-width: none;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      animation: rise 0.7s 0.14s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      animation: rise 0.7s 0.2s ease both;
+    }
+
+    .hero-path {
+      margin-top: 1.15rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      word-break: break-all;
+      animation: rise 0.7s 0.22s ease both;
+    }
+
+    .hero-path strong {
+      color: var(--ink-soft);
+      font-weight: 500;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem 1.25rem;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: transform 0.15s, background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--signal);
+      color: var(--white);
+      border-color: var(--signal);
+    }
+
+    .btn-primary:hover {
+      background: var(--signal-deep);
+      border-color: var(--signal-deep);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .btn-secondary:hover {
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .hero-links {
+      width: 100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 1.5rem 2.5rem;
+      animation: rise 0.7s 0.24s ease both;
+    }
+
+    .hero-links-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-links-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (min-width: 700px) {
+      .hero-links-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 980px) {
+      .hero-links-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .hero-links-grid a {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--line);
+      text-decoration: none;
+      color: var(--ink);
+      transition: color 0.15s;
+    }
+
+    @media (min-width: 700px) {
+      .hero-links-grid a {
+        padding: 1rem 1.25rem 1rem 0;
+      }
+
+      .hero-links-grid a:nth-child(even) {
+        padding-left: 1.25rem;
+        padding-right: 0;
+        border-left: 1px solid var(--line);
+      }
+    }
+
+    @media (min-width: 980px) {
+      .hero-links-grid a,
+      .hero-links-grid a:nth-child(even) {
+        padding: 1rem 1.1rem;
+        border-left: none;
+      }
+
+      .hero-links-grid a:not(:first-child) {
+        border-left: 1px solid var(--line);
+      }
+
+      .hero-links-grid a:first-child {
+        padding-left: 0;
+      }
+
+      .hero-links-grid a:last-child {
+        padding-right: 0;
+      }
+    }
+
+    .hero-links-grid a:hover {
+      color: var(--signal);
+    }
+
+    .hero-links-grid strong {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .hero-links-grid span {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .hero-visual {
+      position: relative;
+      width: 100%;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+      background: var(--ink);
+      color: #d7dde6;
+      overflow: hidden;
+      animation: rise 0.8s 0.28s ease both;
+    }
+
+    .hero-visual::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(196, 30, 58, 0.035) 3px,
+        rgba(196, 30, 58, 0.035) 6px
+      );
+      animation: scan 10s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-visual-inner {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .hero-visual-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: #8b95a5;
+    }
+
+    .hero-visual-bar i {
+      flex: 0 0 8px;
+      width: 8px;
+      height: 8px;
+      display: block;
+      background: var(--signal);
+    }
+
+    .hero-visual pre {
+      margin: 0;
+      padding: 1.25rem 0 1.75rem;
+      font-size: clamp(0.72rem, 1.6vw, 0.85rem);
+      line-height: 1.75;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .t-pass {
+      color: #3dbe7a;
+    }
+
+    .t-fail {
+      color: #ff6b81;
+    }
+
+    .t-warn {
+      color: #f0b429;
+    }
+
+    .t-dim {
+      color: #7a8494;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 1.75rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--ink-soft);
+      text-decoration: none;
+      margin-left: 1rem;
+    }
+
+    footer a:hover {
+      color: var(--signal);
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @keyframes scan {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(40px);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .nav-links a:not(.nav-cta) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="scan-field" aria-hidden="true"></div>
+
+  <nav class="nav" aria-label="Primary">
+    <a class="nav-brand" href="/">CHECK<span>POINT</span></a>
+    <div class="nav-links">
+      <a href="/#coverage">Coverage</a>
+      <a href="/#install">Install</a>
+      <a href="/#docs">Docs</a>
+      <a class="nav-cta" href="https://github.com/andreapollastri/checkpoint" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-copy">
+      <div class="hero-code">Scan result · HTTP 404</div>
+      <div class="hero-brand">404</div>
+      <h1>This path did not pass the scan.</h1>
+      <p>
+        The URL you requested is not part of the Checkpoint documentation.
+        Go home, open the docs, or jump to a section below.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/">Back to home</a>
+        <a class="btn btn-secondary" href="/#docs">Read the docs</a>
+      </div>
+      <p class="hero-path"><strong>Requested:</strong> <span id="requested-path">/</span></p>
+    </div>
+
+    <div class="hero-links">
+      <div class="hero-links-label">Continue here</div>
+      <div class="hero-links-grid">
+        <a href="/#install">
+          <strong>Install</strong>
+          <span>composer require</span>
+        </a>
+        <a href="/#docs">
+          <strong>Documentation</strong>
+          <span>usage &amp; config</span>
+        </a>
+        <a href="/#doc-checks">
+          <strong>All 26 checks</strong>
+          <span>full reference</span>
+        </a>
+        <a href="/#doc-ci">
+          <strong>CI / CD</strong>
+          <span>GitHub · GitLab</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-visual-inner">
+        <div class="hero-visual-bar"><i></i><span>php artisan checkpoint:scan --only="Route Lookup"</span></div>
+        <pre><span class="t-pass">PASS</span>  Docs Index
+<span class="t-dim">      Home, install, and reference are reachable.</span>
+
+<span class="t-fail">FAIL</span>  Route Lookup
+<span class="t-dim">      x Requested path does not exist  [404c4e9k0p01]</span>
+
+<span class="t-warn">WARN</span>  Navigation
+<span class="t-dim">      ! Prefer links from the docs TOC or site nav.</span>
+
+<span class="t-dim">---------------------------------</span>
+Summary  <span class="t-pass">1 passed</span>  <span class="t-warn">1 warn</span>  <span class="t-fail">1 failed</span>
+<span class="t-fail">Scan result: FAIL — return to /</span></pre>
+      </div>
+    </div>
+  </header>
+
+  <footer>
+    <div>
+      &copy; 2026 <a href="https://andreapollastri.net" target="_blank" rel="noopener" style="margin-left:0">Andrea
+        Pollastri</a> — MIT License
+    </div>
+    <div>
+      <a href="https://github.com/andreapollastri/checkpoint" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://packagist.org/packages/andreapollastri/checkpoint" target="_blank" rel="noopener">Packagist</a>
+      <a href="/">Home</a>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var el = document.getElementById("requested-path");
+      if (el) el.textContent = window.location.pathname + window.location.search;
+    })();
+  </script>
+  <script async src="https://stats.web.ap.it/i/ec15c34a-8bd5-4147-8f7a-5de511859980.js"></script>
+  <noscript><img src="https://stats.web.ap.it/collect/pixel.gif?k=ec15c34a-8bd5-4147-8f7a-5de511859980&p=/404" width="1"
+      height="1" alt="" /></noscript>
+</body>
+
+</html>

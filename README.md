@@ -120,7 +120,15 @@ php artisan checkpoint:scan --skip="NPM CVE Audit,Debug Functions in Production 
 php artisan checkpoint:scan --json
 ```
 
-The command exits with code `1` if any check returns `FAIL`, making it suitable as a pipeline gate.
+### Fail the pipeline on warnings
+
+By default, warnings exit with code `0`. For stricter gates:
+
+```bash
+php artisan checkpoint:scan --fail-on-warn
+```
+
+The command exits with code `1` if any check returns `FAIL` (or `WARN` when `--fail-on-warn` is set), making it suitable as a pipeline gate.
 
 ---
 
@@ -132,7 +140,7 @@ Checkpoint works out of the box with sensible defaults. Publish the config file 
 php artisan vendor:publish --tag=checkpoint-config
 ```
 
-This creates `config/checkpoint.php` with two sections:
+This creates `config/checkpoint.php` with sections for toggles, custom checks, freshness, suppressions, and path exclusions.
 
 ### Enabling / disabling checks
 
@@ -150,6 +158,16 @@ Every default check is listed and enabled. Set any entry to `false` to exclude i
 ```
 
 > Checks not listed in the map fall back to **enabled**. When you upgrade Checkpoint and new checks are added, you keep the protection without re-publishing the config — re-publish only when you want to see the full updated list.
+
+### Custom checks
+
+```php
+'extra_checks' => [
+    \App\Security\MyCustomCheck::class,
+],
+```
+
+Listed classes are appended after the built-ins when you run `php artisan checkpoint:scan`. See [Extending with custom checks](#extending-with-custom-checks).
 
 ### Package Freshness tuning
 
@@ -275,7 +293,17 @@ class MyCustomCheck extends AbstractCheck
 }
 ```
 
-Then register it by building a `Scanner` manually instead of using the default:
+Register it in `config/checkpoint.php` so `php artisan checkpoint:scan` picks it up:
+
+```php
+'extra_checks' => [
+    \App\Security\MyCustomCheck::class,
+],
+```
+
+Constructors may take no arguments, or a single `$basePath` string (same convention as built-in checks). You can still disable an extra check via the `checks` map.
+
+Alternatively, build a `Scanner` manually:
 
 ```php
 use Checkpoint\Scanner;
@@ -296,7 +324,7 @@ Checkpoint can scaffold a ready-to-use pipeline for either provider in one comma
 php artisan checkpoint:github
 ```
 
-Creates `.github/workflows/checkpoint.yml` — triggers on push to `main`/`master` and on every pull request. Uses `actions/checkout@v4`, `shivammathur/setup-php@v2` (PHP 8.2), Composer cache, and runs `php artisan checkpoint:scan`. Pass `--force` to overwrite an existing file.
+Creates `.github/workflows/checkpoint.yml` — triggers on push to `main`/`master` and on every pull request. Uses `actions/checkout@v4`, `shivammathur/setup-php@v2` (PHP 8.2), Composer cache, optional Node/`npm ci` when `package-lock.json` is present, and runs `php artisan checkpoint:scan --json` with the report uploaded as an artifact. Pass `--force` to overwrite an existing file.
 
 ### GitLab CI
 
@@ -304,7 +332,7 @@ Creates `.github/workflows/checkpoint.yml` — triggers on push to `main`/`maste
 php artisan checkpoint:gitlab
 ```
 
-Creates `.gitlab-ci.yml` — runs on merge requests and default-branch pushes using the `composer:2` image with a Composer cache. If you already have a `.gitlab-ci.yml`, the command refuses to overwrite and prints the snippet to stdout so you can paste it into your existing pipeline. Use `--force` to overwrite.
+Creates `.gitlab-ci.yml` — runs on merge requests and default-branch pushes using the `composer:2` image with a Composer cache, optional Node when a lockfile is present, JSON output, and a report artifact. If you already have a `.gitlab-ci.yml`, the command refuses to overwrite and prints the snippet to stdout so you can paste it into your existing pipeline. Use `--force` to overwrite.
 
 ### Custom usage
 
@@ -334,10 +362,10 @@ This appends `@php artisan checkpoint:scan` to `scripts.post-update-cmd` and `sc
 
 ### Exit codes
 
-| Code | Meaning                              |
-| ---- | ------------------------------------ |
-| `0`  | All checks passed (or warnings only) |
-| `1`  | At least one check returned `FAIL`   |
+| Code | Meaning                                                                 |
+| ---- | ----------------------------------------------------------------------- |
+| `0`  | All checks passed (or warnings only, unless `--fail-on-warn` is set)    |
+| `1`  | At least one check returned `FAIL`, or a `WARN` with `--fail-on-warn` |
 
 ---
 

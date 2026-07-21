@@ -66,6 +66,83 @@ class ScannerTest extends TestCase
         $this->assertArrayHasKey('SQL Injection Risks', $results);
     }
 
+    public function test_extra_checks_from_config_are_registered(): void
+    {
+        $extra = new class extends AbstractCheck
+        {
+            public function name(): string
+            {
+                return 'Extra Custom Check';
+            }
+
+            public function run(): CheckResult
+            {
+                return CheckResult::pass('ok');
+            }
+        };
+
+        config()->set('checkpoint.extra_checks', [$extra::class]);
+
+        $workspace = $this->makeWorkspace();
+        $results = Scanner::withDefaultChecks($workspace)->run();
+
+        $this->assertArrayHasKey('Extra Custom Check', $results);
+        $this->assertCount(27, $results);
+    }
+
+    public function test_extra_checks_can_be_disabled_via_checks_map(): void
+    {
+        $extra = new class extends AbstractCheck
+        {
+            public function name(): string
+            {
+                return 'Disabled Extra Check';
+            }
+
+            public function run(): CheckResult
+            {
+                return CheckResult::fail('should not run');
+            }
+        };
+
+        config()->set('checkpoint.extra_checks', [$extra::class]);
+        config()->set('checkpoint.checks', array_merge(
+            (array) config('checkpoint.checks', []),
+            [$extra::class => false],
+        ));
+
+        $workspace = $this->makeWorkspace();
+        $results = Scanner::withDefaultChecks($workspace)->run();
+
+        $this->assertArrayNotHasKey('Disabled Extra Check', $results);
+    }
+
+    public function test_extra_checks_accepting_base_path_are_instantiated(): void
+    {
+        $extra = new class('unused') extends AbstractCheck
+        {
+            public function __construct(private string $basePath) {}
+
+            public function name(): string
+            {
+                return 'Base Path Extra Check';
+            }
+
+            public function run(): CheckResult
+            {
+                return CheckResult::pass($this->basePath);
+            }
+        };
+
+        config()->set('checkpoint.extra_checks', [$extra::class]);
+
+        $workspace = $this->makeWorkspace();
+        $results = Scanner::withDefaultChecks($workspace)->run();
+
+        $this->assertArrayHasKey('Base Path Extra Check', $results);
+        $this->assertSame($workspace, $results['Base Path Extra Check']->message);
+    }
+
     private function fakeCheck(string $name, CheckResult $result): AbstractCheck
     {
         return new class($name, $result) extends AbstractCheck

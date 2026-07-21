@@ -115,4 +115,38 @@ class ScanCommandTest extends TestCase
         $this->assertStringContainsString('suppressed', $secrets['message']);
         $this->assertSame(0, $exitCode);
     }
+
+    public function test_fail_on_warn_exits_non_zero_when_only_warnings_exist(): void
+    {
+        $workspace = $this->bootWorkspace();
+        $this->writeFile(
+            $workspace,
+            'app/Http/Controllers/DebugController.php',
+            "<?php\nclass DebugController { public function show() { dd('x'); } }\n",
+        );
+
+        $exitCode = Artisan::call('checkpoint:scan', [
+            '--only' => 'Debug Functions in Production Code',
+            '--fail-on-warn' => true,
+        ]);
+
+        $this->assertSame(1, $exitCode);
+        $this->assertStringContainsString('Scan result: WARN', Artisan::output());
+    }
+
+    public function test_warnings_alone_exit_zero_without_fail_on_warn(): void
+    {
+        $workspace = $this->bootWorkspace();
+        $this->writeFile(
+            $workspace,
+            'app/Http/Controllers/DebugController.php',
+            "<?php\nclass DebugController { public function show() { dd('x'); } }\n",
+        );
+
+        $exitCode = Artisan::call('checkpoint:scan', [
+            '--only' => 'Debug Functions in Production Code',
+        ]);
+
+        $this->assertSame(0, $exitCode);
+    }
 }

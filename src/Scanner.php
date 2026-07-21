@@ -4,6 +4,8 @@ namespace Checkpoint;
 
 use Checkpoint\Checks\AbstractCheck;
 use Checkpoint\Checks\CheckResult;
+use ReflectionClass;
+use ReflectionException;
 
 class Scanner
 {
@@ -80,6 +82,46 @@ class Scanner
             $scanner->add($factory());
         }
 
+        foreach ((array) \config('checkpoint.extra_checks', []) as $class) {
+            if (! is_string($class) || ! class_exists($class) || ! is_subclass_of($class, AbstractCheck::class)) {
+                continue;
+            }
+
+            if (($enabled[$class] ?? true) === false) {
+                continue;
+            }
+
+            $check = self::instantiateCheck($class, $basePath);
+
+            if ($check !== null) {
+                $scanner->add($check);
+            }
+        }
+
         return $scanner;
+    }
+
+    /**
+     * Instantiate a check class, passing $basePath when the constructor expects it.
+     */
+    private static function instantiateCheck(string $class, string $basePath): ?AbstractCheck
+    {
+        try {
+            $reflection = new ReflectionClass($class);
+        } catch (ReflectionException) {
+            return null;
+        }
+
+        if (! $reflection->isInstantiable()) {
+            return null;
+        }
+
+        $constructor = $reflection->getConstructor();
+
+        if ($constructor === null || $constructor->getNumberOfRequiredParameters() === 0) {
+            return $reflection->newInstance();
+        }
+
+        return $reflection->newInstance($basePath);
     }
 }

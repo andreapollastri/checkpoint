@@ -29,5 +29,26 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
+      - name: Set up Node
+        if: hashFiles('package-lock.json') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install npm dependencies
+        if: hashFiles('package-lock.json') != ''
+        run: npm ci --ignore-scripts
+
       - name: Run Checkpoint
-        run: php artisan checkpoint:scan
+        run: |
+          set -o pipefail
+          php artisan checkpoint:scan --json | tee checkpoint-report.json
+
+      - name: Upload Checkpoint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkpoint-report
+          path: checkpoint-report.json
+          if-no-files-found: ignore

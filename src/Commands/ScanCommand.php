@@ -11,7 +11,8 @@ class ScanCommand extends Command
     protected $signature = 'checkpoint:scan
                             {--only= : Comma-separated list of check names to run}
                             {--skip= : Comma-separated list of check names to skip}
-                            {--json  : Output results as JSON}';
+                            {--json  : Output results as JSON}
+                            {--fail-on-warn : Exit with code 1 when warnings are present}';
 
     protected $description = 'Run a full security audit of this Laravel application';
 
@@ -108,7 +109,7 @@ class ScanCommand extends Command
 
         $this->newLine();
 
-        return $failed > 0 ? Command::FAILURE : Command::SUCCESS;
+        return $this->exitCode($failed, $warned);
     }
 
     /**
@@ -117,7 +118,8 @@ class ScanCommand extends Command
     private function outputJson(array $results): int
     {
         $payload = [];
-        $exitCode = Command::SUCCESS;
+        $failed = 0;
+        $warned = 0;
 
         foreach ($results as $name => $result) {
             $hashes = array_map(
@@ -131,14 +133,30 @@ class ScanCommand extends Command
                 'details' => $result->details,
                 'hashes' => $hashes,
             ];
+
             if ($result->status === CheckResult::FAIL) {
-                $exitCode = Command::FAILURE;
+                $failed++;
+            } elseif ($result->status === CheckResult::WARN) {
+                $warned++;
             }
         }
 
         $this->line(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        return $exitCode;
+        return $this->exitCode($failed, $warned);
+    }
+
+    private function exitCode(int $failed, int $warned): int
+    {
+        if ($failed > 0) {
+            return Command::FAILURE;
+        }
+
+        if ($warned > 0 && $this->option('fail-on-warn')) {
+            return Command::FAILURE;
+        }
+
+        return Command::SUCCESS;
     }
 
     private function renderPass(string $name, CheckResult $result): void

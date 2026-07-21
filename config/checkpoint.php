@@ -49,6 +49,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Extra Checks
+    |--------------------------------------------------------------------------
+    |
+    | Register custom AbstractCheck subclasses to run alongside the built-ins.
+    | Classes may take no constructor args, or a single $basePath string.
+    | You can still disable any entry via the `checks` map above.
+    |
+    */
+
+    'extra_checks' => [
+        // \App\Security\MyCustomCheck::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Package Freshness (Supply Chain)
     |--------------------------------------------------------------------------
     |

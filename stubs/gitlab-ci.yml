@@ -10,9 +10,21 @@ checkpoint:
         - composer.lock
     paths:
       - vendor/
+  before_script:
+    - |
+      if [ -f package-lock.json ]; then
+        apk add --no-cache nodejs npm
+        npm ci --ignore-scripts
+      fi
   script:
     - composer install --prefer-dist --no-progress --no-interaction
-    - php artisan checkpoint:scan
+    - set -o pipefail
+    - php artisan checkpoint:scan --json | tee checkpoint-report.json
+  artifacts:
+    when: always
+    paths:
+      - checkpoint-report.json
+    expire_in: 1 week
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
