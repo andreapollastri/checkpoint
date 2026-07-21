@@ -711,6 +711,16 @@
       white-space: nowrap;
     }
 
+    table.docs-table td.check-name .check-class {
+      display: block;
+      margin-top: 0.2rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
     /* Footer */
     footer {
       border-top: 1px solid var(--line);
@@ -1209,7 +1219,7 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
 
         <article class="doc-block" id="doc-checks">
           <h3>All checks</h3>
-          <p>Built-in suite shipped with the package. Severity is the typical gate level for that check.</p>
+          <p>Built-in suite shipped with the package. Class keys match <code>config/checkpoint.php</code> toggles. Severity is the typical gate level for that check.</p>
           <div class="table-wrap">
             <table class="docs-table">
               <thead>
@@ -1223,157 +1233,157 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
               <tbody>
                 <tr>
                   <td>1</td>
-                  <td class="check-name">Composer CVE Audit</td>
+                  <td class="check-name">Composer CVE Audit<span class="check-class">Checks\ComposerAuditCheck::class</span></td>
                   <td><code>composer audit</code> advisories in the lockfile</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>2</td>
-                  <td class="check-name">NPM CVE Audit</td>
+                  <td class="check-name">NPM CVE Audit<span class="check-class">Checks\NpmAuditCheck::class</span></td>
                   <td><code>npm audit</code> critical / high findings</td>
                   <td><span class="sev sev-mixed">Fail / Warn</span></td>
                 </tr>
                 <tr>
                   <td>3</td>
-                  <td class="check-name">Environment Configuration</td>
+                  <td class="check-name">Environment Configuration<span class="check-class">Checks\EnvironmentCheck::class</span></td>
                   <td><code>APP_DEBUG</code>, <code>APP_KEY</code>, <code>APP_URL</code>, session cookie flags</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>4</td>
-                  <td class="check-name">.gitignore Sensitive Files</td>
+                  <td class="check-name">.gitignore Sensitive Files<span class="check-class">Checks\GitIgnoreCheck::class</span></td>
                   <td>Required ignore patterns; fails if <code>.env</code> is tracked</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>5</td>
-                  <td class="check-name">File Permissions</td>
+                  <td class="check-name">File Permissions<span class="check-class">Checks\FilePermissionsCheck::class</span></td>
                   <td>World-readable <code>.env</code> or world-writable <code>storage/</code></td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>6</td>
-                  <td class="check-name">Hardcoded Secrets</td>
+                  <td class="check-name">Hardcoded Secrets<span class="check-class">Checks\HardcodedSecretsCheck::class</span></td>
                   <td>API keys, Stripe, AWS, GitHub PATs, PEM headers in PHP/JS</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>7</td>
-                  <td class="check-name">SQL Injection Risks</td>
+                  <td class="check-name">SQL Injection Risks<span class="check-class">Checks\SqlInjectionCheck::class</span></td>
                   <td>Interpolated variables in raw / <code>*Raw</code> queries</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>8</td>
-                  <td class="check-name">Mass Assignment</td>
+                  <td class="check-name">Mass Assignment<span class="check-class">Checks\MassAssignmentCheck::class</span></td>
                   <td><code>$guarded = []</code> or <code>Model::unguard()</code></td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>9</td>
-                  <td class="check-name">XSS</td>
+                  <td class="check-name">XSS<span class="check-class">Checks\XssCheck::class</span></td>
                   <td>Unescaped Blade <code>{!! !!}</code> and raw echo of request input</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>10</td>
-                  <td class="check-name">CSRF Protection</td>
+                  <td class="check-name">CSRF Protection<span class="check-class">Checks\CsrfCheck::class</span></td>
                   <td>State-changing forms missing <code>@csrf</code>; middleware presence</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>11</td>
-                  <td class="check-name">Open Redirect</td>
+                  <td class="check-name">Open Redirect<span class="check-class">Checks\OpenRedirectCheck::class</span></td>
                   <td><code>redirect($request…)</code> / Location headers from user input</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>12</td>
-                  <td class="check-name">Command Injection</td>
+                  <td class="check-name">Command Injection<span class="check-class">Checks\CommandInjectionCheck::class</span></td>
                   <td><code>exec</code>, <code>shell_exec</code>, <code>system</code>, … with variables</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>13</td>
-                  <td class="check-name">Insecure Deserialization</td>
+                  <td class="check-name">Insecure Deserialization<span class="check-class">Checks\InsecureDeserializationCheck::class</span></td>
                   <td><code>unserialize</code> on user-controlled / base64 chains</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>14</td>
-                  <td class="check-name">Debug Functions</td>
+                  <td class="check-name">Debug Functions<span class="check-class">Checks\DebugFunctionsCheck::class</span></td>
                   <td><code>dd</code>, <code>dump</code>, <code>var_dump</code>, <code>ray</code> outside tests</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>15</td>
-                  <td class="check-name">Sensitive Data Exposure</td>
+                  <td class="check-name">Sensitive Data Exposure<span class="check-class">Checks\SensitiveExposureCheck::class</span></td>
                   <td><code>display_errors</code>, logging secrets, Telescope always-on</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>16</td>
-                  <td class="check-name">SSRF Risks</td>
+                  <td class="check-name">SSRF Risks<span class="check-class">Checks\SsrfCheck::class</span></td>
                   <td>HTTP / cURL / <code>file_get_contents</code> with request-controlled URLs</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>17</td>
-                  <td class="check-name">TLS Certificate Verification</td>
+                  <td class="check-name">TLS Certificate Verification<span class="check-class">Checks\TlsVerificationCheck::class</span></td>
                   <td><code>withoutVerifying()</code>, <code>verify =&gt; false</code>, CURLOPT SSL off</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>18</td>
-                  <td class="check-name">CORS Configuration</td>
+                  <td class="check-name">CORS Configuration<span class="check-class">Checks\CorsConfigCheck::class</span></td>
                   <td>Wildcard origins with credentials and other loose <code>cors.php</code> values</td>
                   <td><span class="sev sev-mixed">Fail / Warn</span></td>
                 </tr>
                 <tr>
                   <td>19</td>
-                  <td class="check-name">Package Freshness</td>
+                  <td class="check-name">Package Freshness<span class="check-class">Checks\PackageFreshnessCheck::class</span></td>
                   <td>Composer packages newer than N days (default 3)</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>20</td>
-                  <td class="check-name">Supply Chain Tooling</td>
+                  <td class="check-name">Supply Chain Tooling<span class="check-class">Checks\SupplyChainToolingCheck::class</span></td>
                   <td>No Safe-Chain / Socket CLI on PATH when <code>package.json</code> exists</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>21</td>
-                  <td class="check-name">Path Traversal</td>
+                  <td class="check-name">Path Traversal<span class="check-class">Checks\PathTraversalCheck::class</span></td>
                   <td>Storage / file ops with user-controlled paths</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>22</td>
-                  <td class="check-name">Weak Cryptography</td>
+                  <td class="check-name">Weak Cryptography<span class="check-class">Checks\WeakCryptographyCheck::class</span></td>
                   <td>mcrypt, ECB, weak ciphers, md5/sha1 near auth keywords</td>
                   <td><span class="sev sev-mixed">Fail / Warn</span></td>
                 </tr>
                 <tr>
                   <td>23</td>
-                  <td class="check-name">Insecure RNG</td>
+                  <td class="check-name">Insecure RNG<span class="check-class">Checks\InsecureRngCheck::class</span></td>
                   <td><code>rand</code> / <code>mt_rand</code> / <code>uniqid</code> in security contexts</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>24</td>
-                  <td class="check-name">Session &amp; Cookie Security</td>
+                  <td class="check-name">Session &amp; Cookie Security<span class="check-class">Checks\SessionSecurityCheck::class</span></td>
                   <td>Weak <code>http_only</code>, <code>same_site</code>, <code>secure</code>, <code>encrypt</code></td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>25</td>
-                  <td class="check-name">EOL Versions</td>
+                  <td class="check-name">EOL Versions<span class="check-class">Checks\EolVersionCheck::class</span></td>
                   <td>PHP / Laravel past or near upstream security cutoff</td>
                   <td><span class="sev sev-mixed">Fail / Warn</span></td>
                 </tr>
                 <tr>
                   <td>26</td>
-                  <td class="check-name">Suspicious Vendor Autoload</td>
+                  <td class="check-name">Suspicious Vendor Autoload<span class="check-class">Checks\SuspiciousVendorAutoloadCheck::class</span></td>
                   <td>Vendor <code>autoload.files</code> outside whitelist</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
