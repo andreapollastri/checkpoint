@@ -18,6 +18,14 @@ class InstallHooksCommand extends Command
 
     public function handle(): int
     {
+        $this->newLine();
+        $this->line('  <fg=cyan;options=bold>┌─┐┬ ┬┌─┐┌─┐┬┌─┌─┐┌─┐┬┌┐┌┌┬┐</>');
+        $this->line('  <fg=cyan;options=bold>│  ├─┤├┤ │  ├┴┐├─┘│ │││││ │ </>');
+        $this->line('  <fg=cyan;options=bold>└─┘┴ ┴└─┘└─┘┴ ┴┴  └─┘┴┘└┘ ┴ </>');
+        $this->newLine();
+        $this->line('  <fg=gray>Laravel Security Scanner — andreapollastri/checkpoint</>');
+        $this->newLine();
+
         $composerPath = base_path('composer.json');
 
         if (! file_exists($composerPath)) {

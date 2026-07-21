@@ -36,6 +36,41 @@ class ScannerTest extends TestCase
         $this->assertArrayHasKey('Custom Name', $results);
     }
 
+    public function test_only_keeps_matching_checks(): void
+    {
+        $scanner = (new Scanner())
+            ->add($this->fakeCheck('Alpha', CheckResult::pass('a')))
+            ->add($this->fakeCheck('Beta', CheckResult::pass('b')))
+            ->only(['beta']);
+
+        $this->assertSame(['Beta'], array_map(fn ($check) => $check->name(), $scanner->checks()));
+        $this->assertSame(['Beta'], array_keys($scanner->run()));
+    }
+
+    public function test_except_drops_matching_checks(): void
+    {
+        $scanner = (new Scanner())
+            ->add($this->fakeCheck('Alpha', CheckResult::pass('a')))
+            ->add($this->fakeCheck('Beta', CheckResult::pass('b')))
+            ->except(['Alpha']);
+
+        $this->assertSame(['Beta'], array_keys($scanner->run()));
+    }
+
+    public function test_run_invokes_before_each_callback(): void
+    {
+        $seen = [];
+
+        (new Scanner())
+            ->add($this->fakeCheck('Alpha', CheckResult::pass('a')))
+            ->add($this->fakeCheck('Beta', CheckResult::pass('b')))
+            ->run(function (AbstractCheck $check) use (&$seen): void {
+                $seen[] = $check->name();
+            });
+
+        $this->assertSame(['Alpha', 'Beta'], $seen);
+    }
+
     public function test_with_default_checks_registers_every_enabled_check(): void
     {
         $workspace = $this->makeWorkspace();

@@ -5,6 +5,7 @@ namespace Checkpoint\Commands;
 use Checkpoint\Checks\CheckResult;
 use Checkpoint\Scanner;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 class ScanCommand extends Command
 {
@@ -19,15 +20,13 @@ class ScanCommand extends Command
     public function handle(): int
     {
         $basePath = base_path();
+        $json = (bool) $this->option('json');
 
-        if (! $this->option('json')) {
+        if (! $json) {
             $this->newLine();
-            $this->line('  <fg=cyan;options=bold>  ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗██████╗  ██████╗ ██╗███╗  ██╗████████╗</>');
-            $this->line('  <fg=cyan;options=bold> ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝██╔══██╗██╔═══██╗██║████╗ ██║╚══██╔══╝</>');
-            $this->line('  <fg=cyan;options=bold> ██║     ███████║█████╗  ██║     █████╔╝ ██████╔╝██║   ██║██║██╔██╗██║   ██║   </>');
-            $this->line('  <fg=cyan;options=bold> ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗ ██╔═══╝ ██║   ██║██║██║╚████║   ██║   </>');
-            $this->line('  <fg=cyan;options=bold>  ╚█████╗██║  ██║███████╗ ╚█████╗██║  ██╗██║      ╚█████╔╝██║██║ ╚███║   ██║   </>');
-            $this->line('  <fg=cyan;options=bold>   ╚════╝╚═╝  ╚═╝╚══════╝  ╚════╝╚═╝  ╚═╝╚═╝       ╚════╝ ╚═╝╚═╝  ╚══╝   ╚═╝   </>');
+            $this->line('  <fg=cyan;options=bold>┌─┐┬ ┬┌─┐┌─┐┬┌─┌─┐┌─┐┬┌┐┌┌┬┐</>');
+            $this->line('  <fg=cyan;options=bold>│  ├─┤├┤ │  ├┴┐├─┘│ │││││ │ </>');
+            $this->line('  <fg=cyan;options=bold>└─┘┴ ┴└─┘└─┘┴ ┴┴  └─┘┴┘└┘ ┴ </>');
             $this->newLine();
             $this->line('  <fg=gray>Laravel Security Scanner — andreapollastri/checkpoint</>');
             $this->line('  <fg=gray>Scanning: '.$basePath.'</>');
@@ -35,35 +34,68 @@ class ScanCommand extends Command
         }
 
         $scanner = Scanner::withDefaultChecks($basePath);
+        $this->applyCheckFilters($scanner);
 
-        $results = $scanner->run();
-
+        $results = $this->runChecks($scanner, $json);
         $results = $this->applySuppressions($results);
 
-        // Apply --only / --skip filters
-        if ($only = $this->option('only')) {
-            $whitelist = array_map('strtolower', array_map('trim', explode(',', $only)));
-            $results = array_filter(
-                $results,
-                fn ($name) => in_array(strtolower($name), $whitelist, true),
-                ARRAY_FILTER_USE_KEY
-            );
-        }
-
-        if ($skip = $this->option('skip')) {
-            $blacklist = array_map('strtolower', array_map('trim', explode(',', $skip)));
-            $results = array_filter(
-                $results,
-                fn ($name) => ! in_array(strtolower($name), $blacklist, true),
-                ARRAY_FILTER_USE_KEY
-            );
-        }
-
-        if ($this->option('json')) {
+        if ($json) {
             return $this->outputJson($results);
         }
 
         return $this->outputTable($results);
+    }
+
+    private function applyCheckFilters(Scanner $scanner): void
+    {
+        if ($only = $this->option('only')) {
+            $scanner->only(array_map('trim', explode(',', $only)));
+        }
+
+        if ($skip = $this->option('skip')) {
+            $scanner->except(array_map('trim', explode(',', $skip)));
+        }
+    }
+
+    /**
+     * @return array<string, CheckResult>
+     */
+    private function runChecks(Scanner $scanner, bool $json): array
+    {
+        if ($json) {
+            return $scanner->run();
+        }
+
+        $checks = $scanner->checks();
+        $total = count($checks);
+
+        if ($total === 0) {
+            return [];
+        }
+
+        ProgressBar::setFormatDefinition(
+            'checkpoint',
+            '  %current%/%max% [%bar%] %percent:3s%% <fg=cyan>%message%</>',
+        );
+
+        $bar = $this->output->createProgressBar($total);
+        $bar->setFormat('checkpoint');
+        $bar->setMessage('Starting…');
+        $bar->start();
+
+        $results = [];
+
+        foreach ($checks as $check) {
+            $bar->setMessage($check->name());
+            $bar->display();
+            $results[$check->name()] = $check->run();
+            $bar->advance();
+        }
+
+        $bar->finish();
+        $this->newLine(2);
+
+        return $results;
     }
 
     /**

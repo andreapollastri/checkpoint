@@ -20,13 +20,60 @@ class Scanner
     }
 
     /**
+     * @return list<AbstractCheck>
+     */
+    public function checks(): array
+    {
+        return $this->checks;
+    }
+
+    /**
+     * Keep only checks whose names are in $only (case-insensitive).
+     *
+     * @param  list<string>  $only
+     */
+    public function only(array $only): static
+    {
+        $whitelist = array_map('strtolower', $only);
+
+        $this->checks = array_values(array_filter(
+            $this->checks,
+            fn (AbstractCheck $check): bool => in_array(strtolower($check->name()), $whitelist, true),
+        ));
+
+        return $this;
+    }
+
+    /**
+     * Drop checks whose names are in $skip (case-insensitive).
+     *
+     * @param  list<string>  $skip
+     */
+    public function except(array $skip): static
+    {
+        $blacklist = array_map('strtolower', $skip);
+
+        $this->checks = array_values(array_filter(
+            $this->checks,
+            fn (AbstractCheck $check): bool => ! in_array(strtolower($check->name()), $blacklist, true),
+        ));
+
+        return $this;
+    }
+
+    /**
+     * @param  (callable(AbstractCheck): void)|null  $beforeEach
      * @return array<string, CheckResult>
      */
-    public function run(): array
+    public function run(?callable $beforeEach = null): array
     {
         $results = [];
 
         foreach ($this->checks as $check) {
+            if ($beforeEach !== null) {
+                $beforeEach($check);
+            }
+
             $results[$check->name()] = $check->run();
         }
 
