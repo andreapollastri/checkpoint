@@ -8,6 +8,10 @@
   <meta name="description" content="Page not found. Return to Checkpoint docs." />
   <meta name="robots" content="noindex" />
   <meta name="theme-color" content="#c41e3a" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -96,16 +100,18 @@
     }
 
     .nav-brand {
-      font-family: var(--display);
-      font-weight: 800;
-      font-size: 1.05rem;
-      letter-spacing: -0.03em;
+      display: block;
+      width: 8.75rem;
+      line-height: 0;
       text-decoration: none;
-      color: var(--ink);
+      flex-shrink: 0;
     }
 
-    .nav-brand span {
-      color: var(--signal);
+    .nav-brand svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
     }
 
     .nav-links {
@@ -498,7 +504,14 @@
   <div class="scan-field" aria-hidden="true"></div>
 
   <nav class="nav" aria-label="Primary">
-    <a class="nav-brand" href="/">CHECK<span>POINT</span></a>
+    <a class="nav-brand" href="/" aria-label="Checkpoint">
+      <svg viewBox="0 0 520 78" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text x="0" y="62" textLength="520" lengthAdjust="spacingAndGlyphs"
+          font-family="Syne, sans-serif" font-size="72" font-weight="800">
+          <tspan fill="#14181f">CHECK</tspan><tspan fill="#c41e3a">POINT</tspan>
+        </text>
+      </svg>
+    </a>
     <div class="nav-links">
       <a href="/#coverage">Coverage</a>
       <a href="/#install">Install</a>

@@ -6,11 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checkpoint — Laravel Security Scanner</title>
   <meta name="description"
-    content="Checkpoint audits Laravel apps for 26 vulnerability categories via a single Artisan command. Docs for install, config, CI, custom checks, and --fail-on-warn." />
+    content="Catch CVEs, leaked secrets, and injection risks in Laravel before they ship — one Artisan command, full docs for install, config, CI, and custom checks." />
   <meta property="og:title" content="Checkpoint — Laravel Security Scanner" />
   <meta property="og:description"
-    content="Security audit for Laravel — CVEs, secrets, SSRF, supply-chain freshness, and more. One command. Full documentation." />
+    content="Catch CVEs, leaked secrets, and injection risks before they ship. One Artisan command for Laravel." />
   <meta property="og:type" content="website" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta name="theme-color" content="#c41e3a" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -107,16 +112,18 @@
     }
 
     .nav-brand {
-      font-family: var(--display);
-      font-weight: 800;
-      font-size: 1.05rem;
-      letter-spacing: -0.03em;
+      display: block;
+      width: 8.75rem;
+      line-height: 0;
       text-decoration: none;
-      color: var(--ink);
+      flex-shrink: 0;
     }
 
-    .nav-brand span {
-      color: var(--signal);
+    .nav-brand svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
     }
 
     .nav-links {
@@ -169,18 +176,16 @@
     }
 
     .hero-brand {
-      font-family: var(--display);
-      font-weight: 800;
-      font-size: clamp(2.75rem, 8vw, 4.75rem);
-      line-height: 1;
-      letter-spacing: -0.04em;
-      color: var(--ink);
+      width: min(100%, 34rem);
+      line-height: 0;
       animation: rise 0.7s ease both;
     }
 
-    .hero-brand em {
-      font-style: normal;
-      color: var(--signal);
+    .hero-brand svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
     }
 
     .hero-copy h1 {
@@ -190,13 +195,13 @@
       letter-spacing: -0.03em;
       line-height: 1.2;
       margin: 1.1rem 0 0.7rem;
-      max-width: 18ch;
+      max-width: none;
       animation: rise 0.7s 0.08s ease both;
     }
 
     .hero-copy p {
       color: var(--muted);
-      max-width: 36rem;
+      max-width: none;
       font-size: 1.1rem;
       line-height: 1.5;
       animation: rise 0.7s 0.14s ease both;
@@ -758,7 +763,14 @@
   <div class="scan-field" aria-hidden="true"></div>
 
   <nav class="nav" aria-label="Primary">
-    <a class="nav-brand" href="/">CHECK<span>POINT</span></a>
+    <a class="nav-brand" href="/" aria-label="Checkpoint">
+      <svg viewBox="0 0 520 78" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text x="0" y="62" textLength="520" lengthAdjust="spacingAndGlyphs"
+          font-family="Syne, sans-serif" font-size="72" font-weight="800">
+          <tspan fill="#14181f">CHECK</tspan><tspan fill="#c41e3a">POINT</tspan>
+        </text>
+      </svg>
+    </a>
     <div class="nav-links">
       <a href="#coverage">Coverage</a>
       <a href="#install">Install</a>
@@ -769,11 +781,17 @@
 
   <header class="hero">
     <div class="hero-copy">
-      <div class="hero-brand">CHECK<em>POINT</em></div>
-      <h1>Security audit. One Artisan command.</h1>
+      <div class="hero-brand" role="img" aria-label="Checkpoint">
+        <svg viewBox="0 0 520 78" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <text x="0" y="62" textLength="520" lengthAdjust="spacingAndGlyphs"
+            font-family="Syne, sans-serif" font-size="72" font-weight="800">
+            <tspan fill="#14181f">CHECK</tspan><tspan fill="#c41e3a">POINT</tspan>
+          </text>
+        </svg>
+      </div>
+      <h1>Security audit.<br>One Artisan command.</h1>
       <p>
-        Scan a Laravel app for CVEs, secrets, injection risks, and supply-chain red flags —
-        then wire the same gate into CI.
+        Catch CVEs, leaked secrets, and injection risks before they ship.
       </p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#install">Install Checkpoint</a>
@@ -805,8 +823,8 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
       <div class="section-kicker">Coverage</div>
       <h2 class="section-title">Twenty-six checks.<br>One pass.</h2>
       <p class="section-lead">
-        Dependency advisories, Laravel config pitfalls, and static patterns for the issues that
-        keep showing up in real apps. Full reference in
+        From lockfile advisories to Laravel config traps and the static patterns that keep biting
+        real apps. Full catalogue in
         <a class="link-inline" href="#doc-checks">Docs → All checks</a>.
       </p>
 
@@ -820,7 +838,7 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
         <div class="coverage-row">
           <span class="n">03–06</span>
           <span class="name">Secrets &amp; env</span>
-          <span class="desc">Hardcoded keys, .gitignore, permissions, unsafe APP_* / session flags.</span>
+          <span class="desc">Hardcoded keys, .gitignore gaps, loose permissions, unsafe APP_* / session flags.</span>
           <span class="sev sev-mixed">Fail / Warn</span>
         </div>
         <div class="coverage-row">
@@ -844,7 +862,7 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
       <div class="section-kicker">Install</div>
       <h2 class="section-title">Running in seconds.</h2>
       <p class="section-lead">
-        Dev dependency only. Auto-discovered by Laravel — no provider registration.
+        Add it as a dev dependency. Laravel discovers the package for you — no provider to register.
       </p>
 
       <div class="install-grid">
@@ -889,23 +907,24 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
       <div class="docs-content">
         <header>
           <div class="section-kicker">Docs</div>
-          <h2 class="section-title">Reference for teams<br>that ship Checkpoint.</h2>
+          <h2 class="section-title">Everything you need to block bad ships.</h2>
           <p class="section-lead" style="margin-bottom:0">
-            Commands, config keys, CI scaffolds, and how findings map to exit codes.
-            Same content as the README — structured for scanning in the browser.
+            Everything that stands between your Laravel app and a bad deploy.
           </p>
         </header>
 
         <article class="doc-block" id="doc-overview">
           <h3>Overview</h3>
           <p>
-            Checkpoint is a Laravel security scanner. It runs a fixed set of built-in checks
-            (plus optional custom ones) and prints a PASS / WARN / FAIL report. Use it locally,
-            after Composer installs, or as a pipeline gate.
+            Checkpoint is a security scanner for Laravel. One Artisan command runs a suite of
+            built-in checks (plus any custom ones you register) and prints a clear
+            PASS / WARN / FAIL report. Run it on your machine, after Composer installs, or as a
+            hard gate in CI.
           </p>
           <p>
-            It is a <strong>static / config / process</strong> auditor — not a runtime WAF and not
-            a full SAST engine. Pair it with containers and install-time guards for supply-chain defense in depth.
+            It audits <strong>code, config, and processes</strong> — not traffic at runtime.
+            It is not a WAF and not a full SAST engine: a focused gate you can run in seconds,
+            not a substitute for deeper analysis.
           </p>
         </article>
 
@@ -928,8 +947,8 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
             <pre><span class="tok-cmd">composer</span> require --dev <span class="tok-arg">andreapollastri/checkpoint</span></pre>
           </div>
           <p style="margin-top:1rem">
-            Package discovery registers the service provider automatically. Publish config only when
-            you need toggles, suppressions, or custom checks:
+            Package discovery wires the service provider automatically. Publish the config only when
+            you need to toggle checks, suppress findings, or register custom ones:
           </p>
           <div class="code-block">
             <div class="code-header">
@@ -954,7 +973,10 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
           </div>
 
           <h4>Limit or skip checks</h4>
-          <p>Flags match check <em>display names</em> (case-insensitive), comma-separated.</p>
+          <p>
+            <code>--only</code> and <code>--skip</code> take check <em>display names</em>
+            (case-insensitive), comma-separated.
+          </p>
           <div class="code-block">
             <div class="code-header">
               <span>bash</span>
@@ -982,12 +1004,15 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
             <pre><span class="tok-cmd">php artisan</span> <span class="tok-arg">checkpoint:scan</span> <span class="tok-flag">--json</span> | tee checkpoint-report.json</pre>
           </div>
           <p style="margin-top:0.85rem">
-            Each finding includes a stable 12-character <code>hash</code> for suppressions.
-            In CI scripts that pipe through <code>tee</code>, enable <code>pipefail</code> so the Artisan exit code is preserved.
+            Every finding carries a stable 12-character <code>hash</code> you can suppress in config.
+            If you pipe through <code>tee</code> in CI, turn on <code>pipefail</code> so the Artisan
+            exit code is not lost.
           </p>
 
           <h4>Fail on warnings</h4>
-          <p>By default WARN does not fail the process. For stricter gates:</p>
+          <p>
+            By default, warnings keep exit code <code>0</code>. Tighten the gate when you are ready:
+          </p>
           <div class="code-block">
             <div class="code-header">
               <span>bash</span>
@@ -1001,8 +1026,8 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
         <article class="doc-block" id="doc-configuration">
           <h3>Configuration</h3>
           <p>
-            Published file: <code>config/checkpoint.php</code>. Checks omitted from the map default to
-            <strong>enabled</strong>, so upgrades keep new protections without re-publishing.
+            Publish to <code>config/checkpoint.php</code>. Any check missing from the map stays
+            <strong>enabled</strong>, so upgrades pick up new protections without a forced re-publish.
           </p>
 
           <h4>Toggle checks</h4>
@@ -1023,7 +1048,7 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
 ],</pre>
           </div>
           <p style="margin-top:0.85rem">
-            Classes may take no constructor args, or a single <code>$basePath</code> string.
+            Constructors may take no arguments, or a single <code>$basePath</code> string.
             Disable an extra check with the same <code>checks</code> map.
           </p>
 
@@ -1039,12 +1064,14 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
 ],</pre>
           </div>
           <p style="margin-top:0.85rem">
-            Set <code>minimum_age_days</code> to <code>0</code> to bypass the age gate without removing the check.
+            Set <code>minimum_age_days</code> to <code>0</code> to keep the check in the suite while
+            skipping the age gate.
           </p>
 
           <h4>Suppress findings</h4>
           <p>
-            Every WARN/FAIL detail shows a hash like <code>[a1b2c3d4e5f6]</code>. Copy it into config:
+            Each WARN/FAIL line shows a hash like <code>[a1b2c3d4e5f6]</code>. Paste it here when
+            you have reviewed and accepted the finding:
           </p>
           <div class="code-block">
             <div class="code-header"><span>php — config/checkpoint.php</span></div>
@@ -1053,8 +1080,9 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
 ],</pre>
           </div>
           <div class="callout">
-            Hashes ignore line-number shifts. Changing the file path or finding text invalidates the hash on purpose.
-            If every finding for a check is suppressed, the check becomes PASS with an explicit suppression message.
+            Hashes ignore line-number shifts. Change the path or the finding text and the hash
+            invalidates on purpose. Suppress every finding for a check and that check reports PASS
+            with an explicit suppression note.
           </div>
 
           <h4>Exclude paths</h4>
@@ -1066,20 +1094,24 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
 ],</pre>
           </div>
           <p style="margin-top:0.85rem">
-            Merged on top of built-in skips (<code>vendor/</code>, <code>node_modules/</code>, <code>storage/</code>, …).
-            Paths are relative to the project root.
+            Paths are relative to the project root and stack on top of built-in skips
+            (<code>vendor/</code>, <code>node_modules/</code>, <code>storage/</code>, …).
           </p>
 
           <h4>Suspicious autoload whitelist</h4>
           <p>
-            Under <code>suspicious_autoload.whitelist</code>, add package names or <code>vendor/*</code> wildcards
-            for trusted <code>autoload.files</code> entries beyond the baked-in list.
+            Under <code>suspicious_autoload.whitelist</code>, list package names or
+            <code>vendor/*</code> wildcards for trusted <code>autoload.files</code> entries beyond
+            the built-in allowlist.
           </p>
         </article>
 
         <article class="doc-block" id="doc-extending">
           <h3>Custom checks</h3>
-          <p>Extend <code>AbstractCheck</code> and return a <code>CheckResult</code>:</p>
+          <p>
+            Extend <code>AbstractCheck</code>, return a <code>CheckResult</code>, and Checkpoint
+            will run it with the rest of the suite:
+          </p>
           <div class="code-block">
             <div class="code-header"><span>php</span></div>
             <pre><span class="tok-cmd">use</span> Checkpoint\Checks\AbstractCheck;
@@ -1101,8 +1133,9 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
 }</pre>
           </div>
           <p style="margin-top:1rem">
-            Register the class in <code>extra_checks</code> so <code>php artisan checkpoint:scan</code> includes it.
-            You can also build a <code>Scanner</code> manually with <code>Scanner::withDefaultChecks($path)->add(...)</code>.
+            Register the class in <code>extra_checks</code> so <code>php artisan checkpoint:scan</code>
+            picks it up. Prefer that path over building a <code>Scanner</code> by hand —
+            <code>Scanner::withDefaultChecks($path)->add(...)</code> remains available when you need it.
           </p>
         </article>
 
@@ -1118,9 +1151,11 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
             <pre><span class="tok-cmd">php artisan</span> <span class="tok-arg">checkpoint:github</span></pre>
           </div>
           <p style="margin-top:0.85rem">
-            Writes <code>.github/workflows/checkpoint.yml</code>: push to <code>main</code>/<code>master</code> and all PRs,
-            PHP 8.2, Composer cache, optional Node + <code>npm ci</code> when <code>package-lock.json</code> exists,
-            <code>checkpoint:scan --json</code> with report artifact. Use <code>--force</code> to overwrite.
+            Writes <code>.github/workflows/checkpoint.yml</code>: runs on push to
+            <code>main</code>/<code>master</code> and on every PR, PHP 8.2 with Composer cache,
+            optional Node + <code>npm ci</code> when <code>package-lock.json</code> is present, and
+            <code>checkpoint:scan --json</code> with the report uploaded as an artifact.
+            Pass <code>--force</code> to overwrite an existing workflow.
           </p>
 
           <h4>GitLab CI</h4>
@@ -1132,8 +1167,9 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
             <pre><span class="tok-cmd">php artisan</span> <span class="tok-arg">checkpoint:gitlab</span></pre>
           </div>
           <p style="margin-top:0.85rem">
-            Creates <code>.gitlab-ci.yml</code> (or prints a snippet if one already exists). Same idea: JSON report artifact,
-            optional Node on Alpine when a lockfile is present. <code>--force</code> overwrites.
+            Creates <code>.gitlab-ci.yml</code>, or prints a ready-to-paste snippet if one already
+            exists. Same pattern: JSON report artifact and optional Node on Alpine when a lockfile
+            is present. <code>--force</code> overwrites.
           </p>
 
           <h4>Composer hooks</h4>
@@ -1146,12 +1182,14 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
           </div>
           <p style="margin-top:0.85rem">
             Appends <code>@php artisan checkpoint:scan</code> to <code>post-install-cmd</code> and
-            <code>post-update-cmd</code>. Idempotent; <code>--remove</code> uninstalls; <code>--force</code> replaces stale entries.
+            <code>post-update-cmd</code>. Safe to re-run; <code>--remove</code> uninstalls;
+            <code>--force</code> replaces stale entries.
           </p>
           <div class="callout">
-            Only <code>post-*</code> hooks: <code>pre-update-cmd</code> runs before resolution (useless against a package about to land),
-            and <code>pre-install-cmd</code> on a fresh clone has no <code>vendor/</code> yet so Artisan cannot run.
-            Real-time install interception belongs to Docker and Safe-Chain — see Companion tools.
+            Only <code>post-*</code> hooks: <code>pre-update-cmd</code> fires before resolution
+            (too early to catch a package about to land), and <code>pre-install-cmd</code> on a
+            fresh clone has no <code>vendor/</code> yet so Artisan cannot run. Blocking malicious
+            installs in real time is a job for Docker and Safe-Chain — see Companion tools.
           </div>
         </article>
 
@@ -1182,13 +1220,22 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
         <article class="doc-block" id="doc-companions">
           <h3>Companion tools</h3>
           <p>
-            Checkpoint inspects the tree; it does not intercept package installs. Harden the install path separately.
+            Checkpoint finds what is already in your tree. It does not stop a malicious package
+            the moment you install it. Supply-chain attacks often run in
+            <code>postinstall</code> scripts — by then SSH keys, browser cookies, and the whole
+            host filesystem are in reach. Close that gap with defense in depth: isolate installs,
+            then add a guard when you must install on the host.
           </p>
 
           <h4>Docker (recommended)</h4>
           <p>
-            Run <code>composer install</code>, <code>npm install</code>, and the scan inside a container.
-            Malicious post-install scripts stay off your host keys and browser profile.
+            Treat the laptop as a control plane. Run <code>composer install</code>,
+            <code>npm install</code>, and <code>php artisan checkpoint:scan</code> inside a
+            disposable container. If a package turns hostile during install, the blast radius is
+            an isolated filesystem you can throw away — not your machine. Docker Compose, a
+            devcontainer, or a CI image with Composer and Node all work; the habit matters more
+            than the tool. Checkpoint’s own CI scaffolds already scan in ephemeral containers —
+            mirror that locally.
           </p>
           <div class="code-block">
             <div class="code-header">
@@ -1201,10 +1248,12 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
 
           <h4>Safe-Chain</h4>
           <p>
+            When you do run npm on the host — CI runners, one-off scripts, machines without Docker —
+            add a second layer.
             <a class="link-inline" href="https://www.npmjs.com/package/@aikidosec/safe-chain" target="_blank"
               rel="noopener">Safe-Chain</a>
-            blocks known-malicious npm packages before install scripts run. Checkpoint’s Supply Chain Tooling check
-            warns when neither Safe-Chain nor Socket CLI is on <code>PATH</code> and <code>package.json</code> exists.
+            (Aikido) is a free shell shim that blocks known-malicious npm packages
+            <strong>before</strong> their install scripts run. Install it once, globally:
           </p>
           <div class="code-block">
             <div class="code-header">
@@ -1215,11 +1264,23 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
             <pre><span class="tok-cmd">npm</span> install -g <span class="tok-arg">@aikidosec/safe-chain</span>
 <span class="tok-cmd">safe-chain</span> setup</pre>
           </div>
+          <p style="margin-top:0.85rem">
+            Checkpoint’s Supply Chain Tooling check looks for Safe-Chain or Socket CLI on
+            <code>PATH</code> whenever a <code>package.json</code> is present, and warns if neither
+            is there. Checkpoint will not install Safe-Chain for you: it is a global shell shim,
+            not a project dependency, and a Composer package should not reach into another
+            ecosystem’s package manager. Prefer Docker for day-to-day installs; keep Safe-Chain as
+            the safety net where containers are not practical.
+          </p>
         </article>
 
         <article class="doc-block" id="doc-checks">
           <h3>All checks</h3>
-          <p>Built-in suite shipped with the package. Class keys match <code>config/checkpoint.php</code> toggles. Severity is the typical gate level for that check.</p>
+          <p>
+            The built-in suite shipped with the package. Use the class keys below in
+            <code>config/checkpoint.php</code> to toggle each check. Severity is the typical gate
+            level for that check.
+          </p>
           <div class="table-wrap">
             <table class="docs-table">
               <thead>
@@ -1395,10 +1456,21 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
         <article class="doc-block" id="doc-limitations">
           <h3>Limitations</h3>
           <ul>
-            <li>Many app-level checks are <strong>regex / heuristics</strong>. Expect false positives and false negatives around indirection, bindings, or multi-line constructs.</li>
-            <li>Environment checks read the <strong>runtime config</strong> of the process running Artisan — not necessarily production <code>.env</code>.</li>
-            <li>NPM audit needs Node and a lockfile on the machine that runs the scan.</li>
-            <li>Package freshness can fail legitimate urgent security patches until you whitelist or lower the window.</li>
+            <li>
+              Most app-level checks are <strong>regex heuristics</strong>. Expect false positives
+              and false negatives around indirection, query bindings, and multi-line constructs.
+            </li>
+            <li>
+              Environment checks read the <strong>runtime config</strong> of the process running
+              Artisan — not necessarily your production <code>.env</code>.
+            </li>
+            <li>
+              NPM audit needs Node and a lockfile on the machine that runs the scan.
+            </li>
+            <li>
+              Package freshness can fail legitimate urgent security patches until you whitelist
+              the package or lower the age window.
+            </li>
           </ul>
           <p style="margin-top:1rem">
             Source and issues:
