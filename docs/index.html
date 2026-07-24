@@ -270,13 +270,11 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 3px,
-        rgba(196, 30, 58, 0.035) 3px,
-        rgba(196, 30, 58, 0.035) 6px
-      );
+      background: repeating-linear-gradient(0deg,
+          transparent,
+          transparent 3px,
+          rgba(196, 30, 58, 0.035) 3px,
+          rgba(196, 30, 58, 0.035) 6px);
       animation: scan 10s linear infinite;
       pointer-events: none;
       z-index: 0;
@@ -340,6 +338,7 @@
         opacity: 0;
         transform: translateY(16px);
       }
+
       to {
         opacity: 1;
         transform: none;
@@ -350,6 +349,7 @@
       from {
         transform: translateY(0);
       }
+
       to {
         transform: translateY(40px);
       }
@@ -610,7 +610,7 @@
       min-width: 0;
     }
 
-    .docs-content > header {
+    .docs-content>header {
       margin-bottom: 2.5rem;
       padding-bottom: 1.5rem;
       border-bottom: 1px solid var(--line);
@@ -642,7 +642,7 @@
       max-width: 42rem;
     }
 
-    .doc-block p + p {
+    .doc-block p+p {
       margin-top: 0.85rem;
     }
 
@@ -651,7 +651,7 @@
       margin: 0.75rem 0 0 1.2rem;
     }
 
-    .doc-block li + li {
+    .doc-block li+li {
       margin-top: 0.35rem;
     }
 
@@ -765,9 +765,10 @@
   <nav class="nav" aria-label="Primary">
     <a class="nav-brand" href="/" aria-label="Checkpoint">
       <svg viewBox="0 0 520 78" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <text x="0" y="62" textLength="520" lengthAdjust="spacingAndGlyphs"
-          font-family="Syne, sans-serif" font-size="72" font-weight="800">
-          <tspan fill="#14181f">CHECK</tspan><tspan fill="#c41e3a">POINT</tspan>
+        <text x="0" y="62" textLength="520" lengthAdjust="spacingAndGlyphs" font-family="Syne, sans-serif"
+          font-size="72" font-weight="800">
+          <tspan fill="#14181f">CHECK</tspan>
+          <tspan fill="#c41e3a">POINT</tspan>
         </text>
       </svg>
     </a>
@@ -783,9 +784,10 @@
     <div class="hero-copy">
       <div class="hero-brand" role="img" aria-label="Checkpoint">
         <svg viewBox="0 0 520 78" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <text x="0" y="62" textLength="520" lengthAdjust="spacingAndGlyphs"
-            font-family="Syne, sans-serif" font-size="72" font-weight="800">
-            <tspan fill="#14181f">CHECK</tspan><tspan fill="#c41e3a">POINT</tspan>
+          <text x="0" y="62" textLength="520" lengthAdjust="spacingAndGlyphs" font-family="Syne, sans-serif"
+            font-size="72" font-weight="800">
+            <tspan fill="#14181f">CHECK</tspan>
+            <tspan fill="#c41e3a">POINT</tspan>
           </text>
         </svg>
       </div>
@@ -850,7 +852,8 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
         <div class="coverage-row">
           <span class="n">18–26</span>
           <span class="name">Supply chain</span>
-          <span class="desc">Package freshness, suspicious vendor autoload.files, EOL PHP/Laravel, CORS, sessions.</span>
+          <span class="desc">Package freshness, suspicious vendor autoload.files, EOL PHP/Laravel, CORS,
+            sessions.</span>
           <span class="sev sev-warn">Fail / Warn</span>
         </div>
       </div>
@@ -932,7 +935,8 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
           <h3>Requirements</h3>
           <ul>
             <li><strong>PHP</strong> <code>^8.1</code> (your Laravel major may require higher)</li>
-            <li><strong>Laravel</strong> <code>8</code>–<code>13</code> (<code>illuminate/support</code> + <code>illuminate/console</code>)</li>
+            <li><strong>Laravel</strong> <code>8</code>–<code>13</code> (<code>illuminate/support</code> +
+              <code>illuminate/console</code>)</li>
           </ul>
         </article>
 
@@ -1294,7 +1298,8 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
               <tbody>
                 <tr>
                   <td>1</td>
-                  <td class="check-name">Composer CVE Audit<span class="check-class">Checks\ComposerAuditCheck::class</span></td>
+                  <td class="check-name">Composer CVE Audit<span
+                      class="check-class">Checks\ComposerAuditCheck::class</span></td>
                   <td><code>composer audit</code> advisories in the lockfile</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
@@ -1306,37 +1311,43 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
                 </tr>
                 <tr>
                   <td>3</td>
-                  <td class="check-name">Environment Configuration<span class="check-class">Checks\EnvironmentCheck::class</span></td>
+                  <td class="check-name">Environment Configuration<span
+                      class="check-class">Checks\EnvironmentCheck::class</span></td>
                   <td><code>APP_DEBUG</code>, <code>APP_KEY</code>, <code>APP_URL</code>, session cookie flags</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>4</td>
-                  <td class="check-name">.gitignore Sensitive Files<span class="check-class">Checks\GitIgnoreCheck::class</span></td>
+                  <td class="check-name">.gitignore Sensitive Files<span
+                      class="check-class">Checks\GitIgnoreCheck::class</span></td>
                   <td>Required ignore patterns; fails if <code>.env</code> is tracked</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>5</td>
-                  <td class="check-name">File Permissions<span class="check-class">Checks\FilePermissionsCheck::class</span></td>
+                  <td class="check-name">File Permissions<span
+                      class="check-class">Checks\FilePermissionsCheck::class</span></td>
                   <td>World-readable <code>.env</code> or world-writable <code>storage/</code></td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>6</td>
-                  <td class="check-name">Hardcoded Secrets<span class="check-class">Checks\HardcodedSecretsCheck::class</span></td>
+                  <td class="check-name">Hardcoded Secrets<span
+                      class="check-class">Checks\HardcodedSecretsCheck::class</span></td>
                   <td>API keys, Stripe, AWS, GitHub PATs, PEM headers in PHP/JS</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>7</td>
-                  <td class="check-name">SQL Injection Risks<span class="check-class">Checks\SqlInjectionCheck::class</span></td>
+                  <td class="check-name">SQL Injection Risks<span
+                      class="check-class">Checks\SqlInjectionCheck::class</span></td>
                   <td>Interpolated variables in raw / <code>*Raw</code> queries</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>8</td>
-                  <td class="check-name">Mass Assignment<span class="check-class">Checks\MassAssignmentCheck::class</span></td>
+                  <td class="check-name">Mass Assignment<span
+                      class="check-class">Checks\MassAssignmentCheck::class</span></td>
                   <td><code>$guarded = []</code> or <code>Model::unguard()</code></td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
@@ -1354,31 +1365,36 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
                 </tr>
                 <tr>
                   <td>11</td>
-                  <td class="check-name">Open Redirect<span class="check-class">Checks\OpenRedirectCheck::class</span></td>
+                  <td class="check-name">Open Redirect<span class="check-class">Checks\OpenRedirectCheck::class</span>
+                  </td>
                   <td><code>redirect($request…)</code> / Location headers from user input</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>12</td>
-                  <td class="check-name">Command Injection<span class="check-class">Checks\CommandInjectionCheck::class</span></td>
+                  <td class="check-name">Command Injection<span
+                      class="check-class">Checks\CommandInjectionCheck::class</span></td>
                   <td><code>exec</code>, <code>shell_exec</code>, <code>system</code>, … with variables</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>13</td>
-                  <td class="check-name">Insecure Deserialization<span class="check-class">Checks\InsecureDeserializationCheck::class</span></td>
+                  <td class="check-name">Insecure Deserialization<span
+                      class="check-class">Checks\InsecureDeserializationCheck::class</span></td>
                   <td><code>unserialize</code> on user-controlled / base64 chains</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>14</td>
-                  <td class="check-name">Debug Functions<span class="check-class">Checks\DebugFunctionsCheck::class</span></td>
+                  <td class="check-name">Debug Functions<span
+                      class="check-class">Checks\DebugFunctionsCheck::class</span></td>
                   <td><code>dd</code>, <code>dump</code>, <code>var_dump</code>, <code>ray</code> outside tests</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>15</td>
-                  <td class="check-name">Sensitive Data Exposure<span class="check-class">Checks\SensitiveExposureCheck::class</span></td>
+                  <td class="check-name">Sensitive Data Exposure<span
+                      class="check-class">Checks\SensitiveExposureCheck::class</span></td>
                   <td><code>display_errors</code>, logging secrets, Telescope always-on</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
@@ -1390,50 +1406,59 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
                 </tr>
                 <tr>
                   <td>17</td>
-                  <td class="check-name">TLS Certificate Verification<span class="check-class">Checks\TlsVerificationCheck::class</span></td>
+                  <td class="check-name">TLS Certificate Verification<span
+                      class="check-class">Checks\TlsVerificationCheck::class</span></td>
                   <td><code>withoutVerifying()</code>, <code>verify =&gt; false</code>, CURLOPT SSL off</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>18</td>
-                  <td class="check-name">CORS Configuration<span class="check-class">Checks\CorsConfigCheck::class</span></td>
+                  <td class="check-name">CORS Configuration<span
+                      class="check-class">Checks\CorsConfigCheck::class</span></td>
                   <td>Wildcard origins with credentials and other loose <code>cors.php</code> values</td>
                   <td><span class="sev sev-mixed">Fail / Warn</span></td>
                 </tr>
                 <tr>
                   <td>19</td>
-                  <td class="check-name">Package Freshness<span class="check-class">Checks\PackageFreshnessCheck::class</span></td>
+                  <td class="check-name">Package Freshness<span
+                      class="check-class">Checks\PackageFreshnessCheck::class</span></td>
                   <td>Composer packages newer than N days (default 3)</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>20</td>
-                  <td class="check-name">Supply Chain Tooling<span class="check-class">Checks\SupplyChainToolingCheck::class</span></td>
+                  <td class="check-name">Supply Chain Tooling<span
+                      class="check-class">Checks\SupplyChainToolingCheck::class</span></td>
                   <td>No Safe-Chain / Socket CLI on PATH when <code>package.json</code> exists</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
                   <td>21</td>
-                  <td class="check-name">Path Traversal<span class="check-class">Checks\PathTraversalCheck::class</span></td>
+                  <td class="check-name">Path Traversal<span class="check-class">Checks\PathTraversalCheck::class</span>
+                  </td>
                   <td>Storage / file ops with user-controlled paths</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>22</td>
-                  <td class="check-name">Weak Cryptography<span class="check-class">Checks\WeakCryptographyCheck::class</span></td>
+                  <td class="check-name">Weak Cryptography<span
+                      class="check-class">Checks\WeakCryptographyCheck::class</span></td>
                   <td>mcrypt, ECB, weak ciphers, md5/sha1 near auth keywords</td>
                   <td><span class="sev sev-mixed">Fail / Warn</span></td>
                 </tr>
                 <tr>
                   <td>23</td>
-                  <td class="check-name">Insecure RNG<span class="check-class">Checks\InsecureRngCheck::class</span></td>
+                  <td class="check-name">Insecure RNG<span class="check-class">Checks\InsecureRngCheck::class</span>
+                  </td>
                   <td><code>rand</code> / <code>mt_rand</code> / <code>uniqid</code> in security contexts</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
                 <tr>
                   <td>24</td>
-                  <td class="check-name">Session &amp; Cookie Security<span class="check-class">Checks\SessionSecurityCheck::class</span></td>
-                  <td>Weak <code>http_only</code>, <code>same_site</code>, <code>secure</code>, <code>encrypt</code></td>
+                  <td class="check-name">Session &amp; Cookie Security<span
+                      class="check-class">Checks\SessionSecurityCheck::class</span></td>
+                  <td>Weak <code>http_only</code>, <code>same_site</code>, <code>secure</code>, <code>encrypt</code>
+                  </td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
                 <tr>
@@ -1444,7 +1469,8 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
                 </tr>
                 <tr>
                   <td>26</td>
-                  <td class="check-name">Suspicious Vendor Autoload<span class="check-class">Checks\SuspiciousVendorAutoloadCheck::class</span></td>
+                  <td class="check-name">Suspicious Vendor Autoload<span
+                      class="check-class">Checks\SuspiciousVendorAutoloadCheck::class</span></td>
                   <td>Vendor <code>autoload.files</code> outside whitelist</td>
                   <td><span class="sev sev-warn">Warn</span></td>
                 </tr>
@@ -1534,9 +1560,9 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
     sections.forEach((section) => tocObserver.observe(section));
   </script>
 
-  <script async src="https://stats.web.ap.it/i/ec15c34a-8bd5-4147-8f7a-5de511859980.js"></script>
-  <noscript><img src="https://stats.web.ap.it/collect/pixel.gif?k=ec15c34a-8bd5-4147-8f7a-5de511859980&p=/" width="1"
-      height="1" alt="" /></noscript>
+  <script async src="https://stats.misterdev.it/i/e5b6c48d-ccde-4c80-a25e-c4e3e5fcb462.js"></script>
+  <noscript><img src="https://stats.misterdev.it/collect/pixel.gif?k=e5b6c48d-ccde-4c80-a25e-c4e3e5fcb462&p=/" width="1"
+      height="1" /></noscript>
 </body>
 
 </html>
