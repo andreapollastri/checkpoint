@@ -28,7 +28,7 @@ class CsrfCheck extends AbstractCheck
 
         foreach ($finder as $file) {
             $content = $file->getContents();
-            $relative = ltrim(str_replace($this->basePath, '', $file->getRealPath()), '/');
+            $relative = self::relativePath($this->basePath, (string) $file->getRealPath());
 
             // Find forms with a mutable HTTP method that lack a CSRF token
             if (preg_match_all('/<form\b[^>]*method=["\'](?:POST|PUT|PATCH|DELETE)["\'][^>]*>/i', $content, $matches)) {

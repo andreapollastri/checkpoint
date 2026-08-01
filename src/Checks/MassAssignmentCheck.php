@@ -35,7 +35,7 @@ class MassAssignmentCheck extends AbstractCheck
                 continue;
             }
 
-            $relative = ltrim(str_replace($this->basePath, '', $file->getRealPath()), '/');
+            $relative = self::relativePath($this->basePath, (string) $file->getRealPath());
 
             // Models that define neither $fillable nor $guarded are NOT flagged:
             // Eloquent defaults to $guarded = ['*'], so every attribute is

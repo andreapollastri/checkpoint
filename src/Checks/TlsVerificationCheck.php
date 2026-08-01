@@ -25,7 +25,7 @@ class TlsVerificationCheck extends AbstractCheck
 
         foreach ($finder as $file) {
             $lines = explode("\n", $file->getContents());
-            $relative = ltrim(str_replace($this->basePath, '', $file->getRealPath()), '/');
+            $relative = self::relativePath($this->basePath, (string) $file->getRealPath());
 
             foreach ($lines as $i => $line) {
                 // Laravel HTTP client: Http::withoutVerifying() or ->withoutVerifying()

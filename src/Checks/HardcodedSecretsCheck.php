@@ -141,7 +141,7 @@ class HardcodedSecretsCheck extends AbstractCheck
 
         foreach ($finder as $file) {
             $lines = explode("\n", $file->getContents());
-            $relative = ltrim(str_replace($this->basePath, '', $file->getRealPath()), '/');
+            $relative = self::relativePath($this->basePath, (string) $file->getRealPath());
 
             // Lang files contain UI strings like 'password' => 'Wrong password.' — always skip
             if ($this->isLangFile($relative)) {
