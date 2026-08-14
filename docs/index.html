@@ -1085,8 +1085,9 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
           </div>
           <div class="callout">
             Hashes ignore line-number shifts. Change the path or the finding text and the hash
-            invalidates on purpose. Suppress every finding for a check and that check reports PASS
-            with an explicit suppression note.
+            invalidates on purpose. Package Freshness hashes use package name + version only, so
+            they stay valid as the displayed release age changes. Suppress every finding for a
+            check and that check reports PASS with an explicit suppression note.
           </div>
 
           <h4>Exclude paths</h4>

@@ -211,6 +211,10 @@ On the next run those findings are filtered out. If every finding of a given che
 
 The hash is content-stable: refactors that only shift line numbers within the same file will **not** invalidate the suppression. The hash _does_ change if you alter the file path or the finding content itself, which is the intended safety net.
 
+Package Freshness findings are an exception: their hash is based on **package name + version only**, so you can suppress one specific release even though the displayed age (`released 5h ago`) changes every hour.
+
+Checks may also supply their own per-detail hashes via the optional fourth argument to `CheckResult::fail()` / `warn()` / `pass()` — a `detail => hash` map. When present, that hash is used for display, JSON output, and suppression instead of hashing the detail text.
+
 > The `--only` / `--skip` CLI flags still work and override the config for the current run, which is handy for ad-hoc scans without editing the config.
 
 ### Excluding folders from file scans

@@ -155,7 +155,7 @@ class ScanCommand extends Command
 
         foreach ($results as $name => $result) {
             $hashes = array_map(
-                fn ($detail) => $this->hashFinding($name, $detail),
+                fn ($detail) => $result->hashFor($name, $detail),
                 $result->details,
             );
             $payload[] = [
@@ -203,7 +203,7 @@ class ScanCommand extends Command
         $this->line("  <fg=yellow;options=bold>  WARN</>  <options=bold>{$name}</>");
         $this->line("        <fg=yellow>{$result->message}</>");
         foreach ($result->details as $detail) {
-            $hash = $this->hashFinding($name, $detail);
+            $hash = $result->hashFor($name, $detail);
             $this->line("        <fg=gray>  ⚑ {$detail}</> <fg=blue>[{$hash}]</>");
         }
         $this->newLine();
@@ -214,23 +214,10 @@ class ScanCommand extends Command
         $this->line("  <fg=red;options=bold>  FAIL</>  <options=bold>{$name}</>");
         $this->line("        <fg=red>{$result->message}</>");
         foreach ($result->details as $detail) {
-            $hash = $this->hashFinding($name, $detail);
+            $hash = $result->hashFor($name, $detail);
             $this->line("        <fg=gray>  ✗ {$detail}</> <fg=blue>[{$hash}]</>");
         }
         $this->newLine();
-    }
-
-    /**
-     * Compute a stable 12-char hash for a finding so users can suppress it
-     * via config/checkpoint.php → 'suppressed'. Line numbers are stripped
-     * from the detail before hashing so refactors that only shift lines
-     * do not invalidate the suppression.
-     */
-    private function hashFinding(string $checkName, string $detail): string
-    {
-        $normalized = preg_replace('/:\d+(?=\s*[—-])/', '', $detail);
-
-        return substr(sha1($checkName.'|'.$normalized), 0, 12);
     }
 
     /**
@@ -258,7 +245,7 @@ class ScanCommand extends Command
             $skipped = 0;
 
             foreach ($result->details as $detail) {
-                $hash = $this->hashFinding($name, $detail);
+                $hash = $result->hashFor($name, $detail);
                 if (isset($suppressed[$hash])) {
                     $skipped++;
 
@@ -285,6 +272,7 @@ class ScanCommand extends Command
                 $result->status,
                 $result->message." ({$skipped} suppressed)",
                 $kept,
+                array_intersect_key($result->hashes, array_flip($kept)),
             );
         }
 
