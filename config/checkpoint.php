@@ -122,7 +122,8 @@ return [
     | you run the scan — copy the bracketed value into this array.
     |
     | The hash is content-stable: refactors that only shift line numbers
-    | will not invalidate it.
+    | will not invalidate it. Package Freshness hashes use package name +
+    | version only, so they stay valid as the displayed release age changes.
     |
     | If every finding of a check is suppressed, the check is downgraded to
     | PASS with an explicit "N suppressed" message.

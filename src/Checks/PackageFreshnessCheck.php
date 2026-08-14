@@ -34,6 +34,7 @@ class PackageFreshnessCheck extends AbstractCheck
         $threshold = time() - ($this->minimumAgeDays * 86400);
         $whitelist = array_flip($this->whitelist);
         $findings = [];
+        $hashes = [];
         $skipped = 0;
 
         foreach (['packages', 'packages-dev'] as $section) {
@@ -58,7 +59,10 @@ class PackageFreshnessCheck extends AbstractCheck
 
                 $ageHours = max(0, (int) floor((time() - $releasedAt) / 3600));
                 $scope = $section === 'packages-dev' ? ' [dev]' : '';
-                $findings[] = "{$name} {$version} released {$ageHours}h ago{$scope}";
+                $detail = "{$name} {$version} released {$ageHours}h ago{$scope}";
+                $findings[] = $detail;
+                // Hash package + version only so suppressions stay valid as the release ages.
+                $hashes[$detail] = CheckResult::hashFinding($this->name(), "{$name} {$version}");
             }
         }
 
@@ -72,6 +76,6 @@ class PackageFreshnessCheck extends AbstractCheck
 
         $message = count($findings)." Composer package(s) released within the last {$this->minimumAgeDays} day(s) — whitelist in config/checkpoint.php if intentional.";
 
-        return CheckResult::fail($message, $findings);
+        return CheckResult::fail($message, $findings, $hashes);
     }
 }

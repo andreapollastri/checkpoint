@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.7] - 2026-08-14
+
+### Fixed
+
+- Package Freshness suppression hashes are based on package name + version only, so they no longer change as the displayed release age increases ([#12](https://github.com/andreapollastri/checkpoint/issues/12))
+
+### Added
+
+- Optional per-detail `hashes` map on `CheckResult` so checks can override the suppression hash used by `checkpoint:scan`
+
 ## [1.1.6] - 2026-08-01
 
 ### Fixed
@@ -189,7 +199,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Hardened Hardcoded Secrets detection before the first tagged release
 
-[Unreleased]: https://github.com/andreapollastri/checkpoint/compare/1.1.6...HEAD
+[1.1.7]: https://github.com/andreapollastri/checkpoint/compare/1.1.6...1.1.7
 [1.1.6]: https://github.com/andreapollastri/checkpoint/compare/1.1.5...1.1.6
 [1.1.5]: https://github.com/andreapollastri/checkpoint/compare/1.1.4...1.1.5
 [1.1.4]: https://github.com/andreapollastri/checkpoint/compare/1.1.3...1.1.4

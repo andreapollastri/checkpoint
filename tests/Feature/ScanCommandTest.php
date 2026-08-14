@@ -149,4 +149,48 @@ class ScanCommandTest extends TestCase
 
         $this->assertSame(0, $exitCode);
     }
+
+    public function test_package_freshness_hash_is_stable_and_can_be_suppressed(): void
+    {
+        $workspace = $this->bootWorkspace();
+        $this->writeFile($workspace, 'composer.lock', json_encode([
+            'packages' => [[
+                'name' => 'acme/fresh-pkg',
+                'version' => '1.2.3',
+                'time' => gmdate('Y-m-d\TH:i:s+00:00', time() - 3600),
+            ]],
+            'packages-dev' => [],
+        ], JSON_THROW_ON_ERROR));
+
+        Artisan::call('checkpoint:scan', [
+            '--only' => 'Package Freshness (Supply Chain)',
+            '--json' => true,
+        ]);
+        $payload = json_decode(Artisan::output(), true);
+        $freshness = collect($payload)->firstWhere('check', 'Package Freshness (Supply Chain)');
+
+        $this->assertSame('fail', $freshness['status']);
+        $this->assertNotEmpty($freshness['hashes']);
+        $this->assertSame(
+            substr(sha1('Package Freshness (Supply Chain)|acme/fresh-pkg 1.2.3'), 0, 12),
+            $freshness['hashes'][0],
+        );
+        $this->assertNotSame(
+            substr(sha1('Package Freshness (Supply Chain)|'.$freshness['details'][0]), 0, 12),
+            $freshness['hashes'][0],
+        );
+
+        config()->set('checkpoint.suppressed', [$freshness['hashes'][0]]);
+
+        $exitCode = Artisan::call('checkpoint:scan', [
+            '--only' => 'Package Freshness (Supply Chain)',
+            '--json' => true,
+        ]);
+        $payload = json_decode(Artisan::output(), true);
+        $freshness = collect($payload)->firstWhere('check', 'Package Freshness (Supply Chain)');
+
+        $this->assertSame('pass', $freshness['status']);
+        $this->assertStringContainsString('suppressed', $freshness['message']);
+        $this->assertSame(0, $exitCode);
+    }
 }

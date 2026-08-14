@@ -32,6 +32,34 @@ class CheckResultTest extends TestCase
         $this->assertSame(CheckResult::FAIL, $result->status);
         $this->assertSame('broken', $result->message);
         $this->assertSame(['detail'], $result->details);
+        $this->assertSame([], $result->hashes);
+    }
+
+    public function test_factory_accepts_optional_per_detail_hashes(): void
+    {
+        $result = CheckResult::fail('broken', ['detail'], ['detail' => 'abc123def456']);
+
+        $this->assertSame(['detail' => 'abc123def456'], $result->hashes);
+        $this->assertSame('abc123def456', $result->hashFor('Some Check', 'detail'));
+    }
+
+    public function test_hash_finding_strips_line_numbers_before_emdash(): void
+    {
+        $withLine = CheckResult::hashFinding('Hardcoded Secrets', "app/Foo.php:14 — secret");
+        $withoutLine = CheckResult::hashFinding('Hardcoded Secrets', "app/Foo.php — secret");
+
+        $this->assertSame($withoutLine, $withLine);
+        $this->assertSame(12, strlen($withLine));
+    }
+
+    public function test_hash_for_falls_back_to_hashing_the_detail_text(): void
+    {
+        $result = CheckResult::fail('broken', ['fresh detail']);
+
+        $this->assertSame(
+            CheckResult::hashFinding('Some Check', 'fresh detail'),
+            $result->hashFor('Some Check', 'fresh detail'),
+        );
     }
 
     public function test_status_constants_are_distinct(): void
