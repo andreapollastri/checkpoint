@@ -416,6 +416,10 @@ src/
 
 ---
 
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md). Do not open a public issue.
+
 ## License
 
 MIT — [Andrea Pollastri](https://andreapollastri.net)
