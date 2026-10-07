@@ -78,8 +78,8 @@ class ScannerTest extends TestCase
         $scanner = Scanner::withDefaultChecks($workspace);
         $results = $scanner->run();
 
-        // The config ships 26 default checks, all enabled out of the box.
-        $this->assertCount(26, $results);
+        // The config ships 30 default checks, all enabled out of the box.
+        $this->assertCount(30, $results);
         $this->assertArrayHasKey('Hardcoded Secrets', $results);
         $this->assertArrayHasKey('SQL Injection Risks', $results);
         $this->assertArrayHasKey('EOL Versions', $results);
@@ -122,7 +122,7 @@ class ScannerTest extends TestCase
         $results = Scanner::withDefaultChecks($workspace)->run();
 
         $this->assertArrayHasKey('Extra Custom Check', $results);
-        $this->assertCount(27, $results);
+        $this->assertCount(31, $results);
     }
 
     public function test_extra_checks_can_be_disabled_via_checks_map(): void

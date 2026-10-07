@@ -823,7 +823,7 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
   <section id="coverage" class="band">
     <div class="section-inner">
       <div class="section-kicker">Coverage</div>
-      <h2 class="section-title">Twenty-six checks.<br>One pass.</h2>
+      <h2 class="section-title">Thirty checks.<br>One pass.</h2>
       <p class="section-lead">
         From lockfile advisories to Laravel config traps and the static patterns that keep biting
         real apps. Full catalogue in
@@ -855,6 +855,13 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
           <span class="desc">Package freshness, suspicious vendor autoload.files, EOL PHP/Laravel, CORS,
             sessions.</span>
           <span class="sev sev-warn">Fail / Warn</span>
+        </div>
+        <div class="coverage-row">
+          <span class="n">27–30</span>
+          <span class="name">Dependency hygiene</span>
+          <span class="desc">Outdated and abandoned Composer packages, insecure composer.json settings, XXE
+            parser flags.</span>
+          <span class="sev sev-mixed">Fail / Warn</span>
         </div>
       </div>
     </div>
@@ -1085,8 +1092,8 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
           </div>
           <div class="callout">
             Hashes ignore line-number shifts. Change the path or the finding text and the hash
-            invalidates on purpose. Package Freshness hashes use package name + version only, so
-            they stay valid as the displayed release age changes. Suppress every finding for a
+            invalidates on purpose. Package Freshness and Outdated Composer Packages hashes use package
+            name + installed version only, so they stay valid as the release ages or newer versions ship. Suppress every finding for a
             check and that check reports PASS with an explicit suppression note.
           </div>
 
@@ -1108,6 +1115,13 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
             Under <code>suspicious_autoload.whitelist</code>, list package names or
             <code>vendor/*</code> wildcards for trusted <code>autoload.files</code> entries beyond
             the built-in allowlist.
+          </p>
+
+          <h4>Outdated packages</h4>
+          <p>
+            <code>outdated_packages.ignore</code> takes package names or <code>vendor/*</code> wildcards
+            you pin on purpose. Set <code>outdated_packages.include_dev</code> to <code>true</code> to
+            also report <code>require-dev</code> dependencies.
           </p>
         </article>
 
@@ -1474,6 +1488,35 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
                       class="check-class">Checks\SuspiciousVendorAutoloadCheck::class</span></td>
                   <td>Vendor <code>autoload.files</code> outside whitelist</td>
                   <td><span class="sev sev-warn">Warn</span></td>
+                </tr>
+                <tr>
+                  <td>27</td>
+                  <td class="check-name">Outdated Composer Packages<span
+                      class="check-class">Checks\OutdatedPackagesCheck::class</span></td>
+                  <td>Direct dependencies behind their latest release (<code>composer outdated --direct</code>)</td>
+                  <td><span class="sev sev-warn">Warn</span></td>
+                </tr>
+                <tr>
+                  <td>28</td>
+                  <td class="check-name">Abandoned Composer Packages<span
+                      class="check-class">Checks\AbandonedPackagesCheck::class</span></td>
+                  <td>Packages marked abandoned in <code>composer.lock</code></td>
+                  <td><span class="sev sev-warn">Warn</span></td>
+                </tr>
+                <tr>
+                  <td>29</td>
+                  <td class="check-name">Composer Configuration<span
+                      class="check-class">Checks\ComposerConfigCheck::class</span></td>
+                  <td><code>secure-http: false</code>, <code>http://</code> repositories, committed credentials,
+                    <code>allow-plugins: true</code>, unstable stability, silenced audits</td>
+                  <td><span class="sev sev-mixed">Fail / Warn</span></td>
+                </tr>
+                <tr>
+                  <td>30</td>
+                  <td class="check-name">XML External Entity (XXE) Risks<span
+                      class="check-class">Checks\XxeCheck::class</span></td>
+                  <td><code>LIBXML_NOENT</code>, <code>LIBXML_DTDLOAD</code>, re-enabled entity loader</td>
+                  <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
               </tbody>
             </table>

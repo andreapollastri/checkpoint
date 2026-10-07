@@ -116,6 +116,14 @@ class Scanner
             Checks\InsecureRngCheck::class => fn () => new Checks\InsecureRngCheck($basePath),
             Checks\SessionSecurityCheck::class => fn () => new Checks\SessionSecurityCheck($basePath),
             Checks\EolVersionCheck::class => fn () => new Checks\EolVersionCheck($basePath),
+            Checks\OutdatedPackagesCheck::class => fn () => new Checks\OutdatedPackagesCheck(
+                $basePath,
+                (array) \config('checkpoint.outdated_packages.ignore', []),
+                (bool) \config('checkpoint.outdated_packages.include_dev', false),
+            ),
+            Checks\AbandonedPackagesCheck::class => fn () => new Checks\AbandonedPackagesCheck($basePath),
+            Checks\ComposerConfigCheck::class => fn () => new Checks\ComposerConfigCheck($basePath),
+            Checks\XxeCheck::class => fn () => new Checks\XxeCheck($basePath),
         ];
 
         $enabled = (array) \config('checkpoint.checks', []);

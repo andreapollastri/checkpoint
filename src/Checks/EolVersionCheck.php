@@ -4,14 +4,32 @@ namespace Checkpoint\Checks;
 
 class EolVersionCheck extends AbstractCheck
 {
-    // EOL cutoffs (as of 2026-05). FAIL = no security fixes at all.
-    // WARN = security fixes ending within ~12 months.
-    private const PHP_EOL_BELOW = 80200;       // PHP < 8.2 → no support
-    private const PHP_WARN_BELOW = 80300;      // PHP 8.2 → security ends Dec 2026
-    private const LARAVEL_EOL_MAJOR = 11;      // Laravel < 11 → EOL; Laravel 11 → security ended Mar 2026
-    private const LARAVEL_WARN_MAJOR = 12;     // Laravel 11 → warn
+    // End of security support per branch. FAIL once the date has passed,
+    // WARN when it falls within WARN_WINDOW_DAYS. Versions older than the
+    // first entry are treated as EOL; versions newer than the last as supported.
+    // Sources: php.net/supported-versions, laravel.com/docs/releases#support-policy.
+    private const PHP_SECURITY_EOL = [
+        '8.1' => '2025-12-31',
+        '8.2' => '2026-12-31',
+        '8.3' => '2027-12-31',
+        '8.4' => '2028-12-31',
+        '8.5' => '2029-12-31',
+    ];
 
-    public function __construct(private readonly string $basePath) {}
+    private const LARAVEL_SECURITY_EOL = [
+        '10' => '2025-02-04',
+        '11' => '2026-03-12',
+        '12' => '2027-02-24',
+        '13' => '2028-03-17',
+    ];
+
+    private const WARN_WINDOW_DAYS = 365;
+
+    public function __construct(
+        private readonly string $basePath,
+        private readonly ?string $phpVersion = null,
+        private readonly ?int $now = null,
+    ) {}
 
     public function name(): string
     {
@@ -24,38 +42,30 @@ class EolVersionCheck extends AbstractCheck
         $hasCritical = false;
 
         // ---- PHP ----
-        if (PHP_VERSION_ID < self::PHP_EOL_BELOW) {
-            $findings[] = 'PHP '.PHP_VERSION.' is end-of-life — no security fixes from upstream. Upgrade to 8.3+ as soon as possible.';
-            $hasCritical = true;
-        } elseif (PHP_VERSION_ID < self::PHP_WARN_BELOW) {
-            $findings[] = 'PHP '.PHP_VERSION.' is in security-only support and approaches end-of-life. Plan upgrade to 8.3+.';
+        $php = $this->phpVersion ?? PHP_VERSION;
+        if (preg_match('/^(\d+)\.(\d+)/', $php, $m)) {
+            $status = $this->status(self::PHP_SECURITY_EOL, "{$m[1]}.{$m[2]}");
+            $target = 'PHP '.$this->upgradeTarget(self::PHP_SECURITY_EOL).'+';
+
+            if ($status['eol']) {
+                $findings[] = "PHP {$php} is end-of-life{$status['since']} — no security fixes from upstream. Upgrade to {$target} as soon as possible.";
+                $hasCritical = true;
+            } elseif ($status['warn']) {
+                $findings[] = "PHP {$php} receives security fixes only until {$status['date']}. Plan an upgrade to {$target}.";
+            }
         }
 
         // ---- Laravel ----
-        $lockPath = $this->basePath.'/composer.lock';
-        if (file_exists($lockPath)) {
-            $lock = @json_decode((string) file_get_contents($lockPath), true);
-            if (is_array($lock)) {
-                $packages = array_merge($lock['packages'] ?? [], $lock['packages-dev'] ?? []);
-                foreach ($packages as $pkg) {
-                    if (($pkg['name'] ?? null) !== 'laravel/framework') {
-                        continue;
-                    }
+        $version = $this->lockedVersion('laravel/framework');
+        if ($version !== null && preg_match('/^(\d+)/', $version, $m) && (int) $m[1] > 0) {
+            $status = $this->status(self::LARAVEL_SECURITY_EOL, $m[1]);
+            $target = 'Laravel '.$this->upgradeTarget(self::LARAVEL_SECURITY_EOL).'+';
 
-                    $version = ltrim((string) ($pkg['version'] ?? ''), 'v');
-                    if (! preg_match('/^(\d+)/', $version, $m)) {
-                        break;
-                    }
-                    $major = (int) $m[1];
-
-                    if ($major > 0 && $major < self::LARAVEL_EOL_MAJOR) {
-                        $findings[] = "Laravel {$version} is end-of-life — no security fixes. Upgrade to Laravel ".self::LARAVEL_EOL_MAJOR.'+ as soon as possible.';
-                        $hasCritical = true;
-                    } elseif ($major < self::LARAVEL_WARN_MAJOR) {
-                        $findings[] = "Laravel {$version} is in security-only support and approaches end-of-life. Plan upgrade to Laravel ".self::LARAVEL_WARN_MAJOR.'+.';
-                    }
-                    break;
-                }
+            if ($status['eol']) {
+                $findings[] = "Laravel {$version} is end-of-life{$status['since']} — no security fixes. Upgrade to {$target} as soon as possible.";
+                $hasCritical = true;
+            } elseif ($status['warn']) {
+                $findings[] = "Laravel {$version} receives security fixes only until {$status['date']}. Plan an upgrade to {$target}.";
             }
         }
 
@@ -68,5 +78,70 @@ class EolVersionCheck extends AbstractCheck
         return $hasCritical
             ? CheckResult::fail($message, $findings)
             : CheckResult::warn($message, $findings);
+    }
+
+    /**
+     * @param  array<string, string>  $table  branch => security EOL date
+     * @return array{eol: bool, warn: bool, date: string, since: string}
+     */
+    private function status(array $table, string $branch): array
+    {
+        $date = $table[$branch] ?? null;
+
+        if ($date === null) {
+            // Unknown branch: older than the table → EOL, newer → supported.
+            $eol = version_compare($branch, (string) array_key_first($table), '<');
+
+            return ['eol' => $eol, 'warn' => false, 'date' => '', 'since' => ''];
+        }
+
+        $now = $this->now ?? time();
+        $ends = (int) strtotime($date.' 23:59:59 UTC');
+
+        return [
+            'eol' => $now > $ends,
+            'warn' => $now <= $ends && $ends - $now <= self::WARN_WINDOW_DAYS * 86400,
+            'date' => $date,
+            'since' => " since {$date}",
+        ];
+    }
+
+    /**
+     * Oldest branch that stays supported beyond the warn window.
+     *
+     * @param  array<string, string>  $table
+     */
+    private function upgradeTarget(array $table): string
+    {
+        foreach (array_keys($table) as $branch) {
+            $status = $this->status($table, (string) $branch);
+
+            if (! $status['eol'] && ! $status['warn']) {
+                return (string) $branch;
+            }
+        }
+
+        return (string) array_key_last($table);
+    }
+
+    private function lockedVersion(string $package): ?string
+    {
+        $lockPath = $this->basePath.'/composer.lock';
+        if (! file_exists($lockPath)) {
+            return null;
+        }
+
+        $lock = @json_decode((string) file_get_contents($lockPath), true);
+        if (! is_array($lock)) {
+            return null;
+        }
+
+        foreach (array_merge($lock['packages'] ?? [], $lock['packages-dev'] ?? []) as $pkg) {
+            if (($pkg['name'] ?? null) === $package) {
+                return ltrim((string) ($pkg['version'] ?? ''), 'v');
+            }
+        }
+
+        return null;
     }
 }

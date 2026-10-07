@@ -11,6 +11,15 @@ class GitIgnoreCheck extends AbstractCheck
         'storage/logs',
         '.env.backup',
         '.env.production',
+        'auth.json',
+    ];
+
+    /**
+     * Files that must never be committed, with the follow-up to give when they are.
+     */
+    private const NEVER_TRACKED = [
+        '.env' => 'remove it with `git rm --cached .env` immediately.',
+        'auth.json' => 'it holds Composer registry credentials — remove it with `git rm --cached auth.json` and rotate the tokens.',
     ];
 
     public function __construct(private readonly string $basePath) {}
@@ -37,12 +46,15 @@ class GitIgnoreCheck extends AbstractCheck
             }
         }
 
-        // Check if .env is tracked by git (the worst case)
-        $envPath = $this->basePath.'/.env';
-        if (file_exists($envPath)) {
-            exec('git -C '.escapeshellarg($this->basePath).' ls-files --error-unmatch .env 2>/dev/null', $out, $code);
+        // Check if secret files are tracked by git (the worst case)
+        foreach (self::NEVER_TRACKED as $file => $advice) {
+            if (! file_exists($this->basePath.'/'.$file)) {
+                continue;
+            }
+
+            exec('git -C '.escapeshellarg($this->basePath).' ls-files --error-unmatch '.escapeshellarg($file).' 2>/dev/null', $out, $code);
             if ($code === 0) {
-                return CheckResult::fail('.env is actively tracked by git — remove it with `git rm --cached .env` immediately.');
+                return CheckResult::fail("{$file} is actively tracked by git — {$advice}");
             }
         }
 

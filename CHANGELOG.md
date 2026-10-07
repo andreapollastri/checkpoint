@@ -5,6 +5,27 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-10-07
+
+### Added
+
+- **Outdated Composer Packages** check — runs `composer outdated --locked --direct` and warns about direct dependencies behind their latest release (minor/patch vs major); `outdated_packages.ignore` / `include_dev` config
+- **Abandoned Composer Packages** check — flags packages marked abandoned in `composer.lock`, with the suggested replacement
+- **Composer Configuration** check — flags `secure-http: false`, `disable-tls`, `http://` repositories, registry credentials in `composer.json`, `allow-plugins: true`, unstable `minimum-stability` without `prefer-stable`, `audit.block-insecure: false`, and advisories silenced via `audit.ignore`
+- **XML External Entity (XXE) Risks** check — flags `LIBXML_NOENT`, `LIBXML_DTDLOAD`/`DTDATTR`, `libxml_disable_entity_loader(false)`, and DOM/XMLReader entity options
+- `.gitignore` check requires `auth.json` and fails when `auth.json` is tracked by git
+- Explicit `symfony/finder` and `symfony/process` requirements (previously only pulled in transitively)
+
+### Fixed
+
+- Composer CVE Audit no longer reports PASS when `composer audit` cannot run (Composer missing from PATH, no network, no `vendor/`); it now audits `composer.lock` via `--locked` and warns on failure
+- NPM CVE Audit no longer reports PASS when npm is missing or `npm audit` errors (e.g. `ENOLOCK` on yarn/pnpm-only projects)
+- EOL Versions uses dated support tables: Laravel 11 (security EOL 2026-03-12) now fails, and Laravel 12 warns within a year of its 2027-02-24 cutoff
+
+### Changed
+
+- EOL Versions finding messages include the cutoff date, so existing suppression hashes for that check change
+
 ## [1.1.8] - 2026-09-18
 
 ### Added
@@ -207,6 +228,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Hardened Hardcoded Secrets detection before the first tagged release
 
+[1.2.0]: https://github.com/andreapollastri/checkpoint/compare/1.1.8...1.2.0
 [1.1.8]: https://github.com/andreapollastri/checkpoint/compare/1.1.7...1.1.8
 [1.1.7]: https://github.com/andreapollastri/checkpoint/compare/1.1.6...1.1.7
 [1.1.6]: https://github.com/andreapollastri/checkpoint/compare/1.1.5...1.1.6

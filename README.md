@@ -12,10 +12,10 @@ php artisan checkpoint:scan
 
 | #   | Check                                                                                                                                                                                                       | Severity        |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| 1   | **Composer CVE Audit** — runs `composer audit` and reports known advisories                                                                                                                                 | `FAIL`          |
-| 2   | **NPM CVE Audit** — runs `npm audit` and flags critical/high vulnerabilities                                                                                                                                | `FAIL` / `WARN` |
+| 1   | **Composer CVE Audit** — runs `composer audit` against `composer.lock` and reports known advisories; warns (never passes) if Composer cannot run                                                            | `FAIL` / `WARN` |
+| 2   | **NPM CVE Audit** — runs `npm audit` and flags critical/high vulnerabilities; warns if npm cannot run or the lockfile is unsupported (yarn/pnpm)                                                            | `FAIL` / `WARN` |
 | 3   | **Environment Configuration** — `APP_DEBUG`, `APP_KEY`, `APP_URL`, `SESSION_SECURE_COOKIE`                                                                                                                  | `WARN`          |
-| 4   | **`.gitignore` Sensitive Files** — ensures `.env`, `*.key`, `*.pem` are excluded; detects if `.env` is tracked by git                                                                                       | `FAIL`          |
+| 4   | **`.gitignore` Sensitive Files** — ensures `.env`, `*.key`, `*.pem`, `auth.json` are excluded; detects if `.env` or `auth.json` is tracked by git                                                           | `FAIL`          |
 | 5   | **File Permissions** — flags world-readable `.env` or world-writable `storage/`                                                                                                                             | `WARN`          |
 | 6   | **Hardcoded Secrets** — scans PHP/JS files for API keys, Stripe tokens, AWS keys, GitHub PATs, PEM headers                                                                                                  | `FAIL`          |
 | 7   | **SQL Injection Risks** — detects raw queries with variable interpolation (`DB::select("… $var")`, `->whereRaw(…)`)                                                                                         | `FAIL`          |
@@ -36,8 +36,12 @@ php artisan checkpoint:scan
 | 22  | **Weak Cryptography** — flags `mcrypt_*`, ECB mode, DES/3DES/RC4, and `md5`/`sha1` used near password/token/HMAC keywords                                                                                   | `FAIL` / `WARN` |
 | 23  | **Insecure RNG** — detects `rand`/`mt_rand`/`uniqid` used in security contexts (tokens, CSRF, password reset, OTP)                                                                                          | `FAIL`          |
 | 24  | **Session & Cookie Security** — audits `config/session.php` for `http_only=false`, `same_site=null/none`, `secure=false`, `encrypt=false`                                                                   | `WARN`          |
-| 25  | **EOL Versions** — flags Composer-locked Laravel and the running PHP when they are past or approaching upstream security cutoff                                                                             | `FAIL` / `WARN` |
+| 25  | **EOL Versions** — flags Composer-locked Laravel and the running PHP past their security cutoff (FAIL) or within 12 months of it (WARN)                                                                     | `FAIL` / `WARN` |
 | 26  | **Suspicious Vendor Autoload** — flags packages under `vendor/` that register PHP via `autoload.files` outside a baked-in whitelist (the mechanism abused by the May 2026 Laravel-Lang supply-chain attack) | `WARN`          |
+| 27  | **Outdated Composer Packages** — runs `composer outdated --direct` and lists direct dependencies behind their latest release (minor/patch vs major)                                                         | `WARN`          |
+| 28  | **Abandoned Composer Packages** — flags packages marked abandoned in `composer.lock`, with the suggested replacement                                                                                        | `WARN`          |
+| 29  | **Composer Configuration** — flags `secure-http: false`, `disable-tls`, `http://` repositories, credentials in `composer.json`, `allow-plugins: true`, unstable `minimum-stability`, and silenced audits    | `FAIL` / `WARN` |
+| 30  | **XML External Entity (XXE) Risks** — detects `LIBXML_NOENT`, `LIBXML_DTDLOAD`, `libxml_disable_entity_loader(false)` and other opt-ins to entity/DTD loading                                               | `FAIL`          |
 
 ---
 
@@ -140,7 +144,7 @@ Checkpoint works out of the box with sensible defaults. Publish the config file 
 php artisan vendor:publish --tag=checkpoint-config
 ```
 
-This creates `config/checkpoint.php` with sections for toggles, custom checks, freshness, suppressions, and path exclusions.
+This creates `config/checkpoint.php` with sections for toggles, custom checks, freshness, outdated packages, suppressions, and path exclusions.
 
 ### Enabling / disabling checks
 
@@ -187,6 +191,23 @@ Listed classes are appended after the built-ins when you run `php artisan checkp
 
 > Checkpoint ships with `andreapollastri/checkpoint` already whitelisted by default — a fresh release of the scanner itself should never block its own user's deploy. Remove the entry if you want to gate even Checkpoint upgrades through the freshness window.
 
+### Outdated packages tuning
+
+```php
+'outdated_packages' => [
+    'include_dev' => false,
+    'ignore' => [
+        // 'vendor/package',
+        // 'acme/*',
+    ],
+],
+```
+
+- `include_dev` — also report outdated `require-dev` dependencies. Default `false` (production dependencies only).
+- `ignore` — packages you deliberately pin. Exact names or `vendor/*` wildcards.
+
+The check runs `composer outdated --locked --direct`, so it needs network access to Packagist but not a populated `vendor/`.
+
 ### Suppressing individual findings
 
 Every `WARN` or `FAIL` finding is shown with a stable 12-character hash:
@@ -211,7 +232,7 @@ On the next run those findings are filtered out. If every finding of a given che
 
 The hash is content-stable: refactors that only shift line numbers within the same file will **not** invalidate the suppression. The hash _does_ change if you alter the file path or the finding content itself, which is the intended safety net.
 
-Package Freshness findings are an exception: their hash is based on **package name + version only**, so you can suppress one specific release even though the displayed age (`released 5h ago`) changes every hour.
+Package Freshness and Outdated Composer Packages findings are an exception: their hash is based on **package name + installed version only**, so a suppression survives the displayed age (`released 5h ago`) changing every hour, or a newer upstream release appearing. It expires as soon as you install a different version.
 
 Checks may also supply their own per-detail hashes via the optional fourth argument to `CheckResult::fail()` / `warn()` / `pass()` — a `detail => hash` map. When present, that hash is used for display, JSON output, and suppression instead of hashing the detail text.
 
@@ -411,7 +432,11 @@ src/
     ├── WeakCryptographyCheck.php
     ├── InsecureRngCheck.php
     ├── SessionSecurityCheck.php
-    └── EolVersionCheck.php
+    ├── EolVersionCheck.php
+    ├── OutdatedPackagesCheck.php
+    ├── AbandonedPackagesCheck.php
+    ├── ComposerConfigCheck.php
+    └── XxeCheck.php
 ```
 
 ---

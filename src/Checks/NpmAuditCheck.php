@@ -27,10 +27,28 @@ class NpmAuditCheck extends AbstractCheck
             return CheckResult::warn('No lock file found (package-lock.json / yarn.lock / pnpm-lock.yaml) — skipping NPM audit.');
         }
 
-        $process = new Process(['npm', 'audit', '--json'], $this->basePath, timeout: 120);
-        $process->run();
+        $output = $this->npmAudit($error);
 
-        $output = @json_decode($process->getOutput(), true) ?? [];
+        // No JSON means npm did not run (not on PATH, offline…) — never report that as "no CVEs".
+        if ($output === null) {
+            return CheckResult::warn(
+                'Could not run `npm audit` — make sure npm is on PATH and the registry is reachable.',
+                $error !== '' ? [$error] : [],
+            );
+        }
+
+        // npm reports its own failures as JSON, e.g. ENOLOCK when only yarn.lock / pnpm-lock.yaml exists.
+        if (isset($output['error'])) {
+            $code = $output['error']['code'] ?? 'unknown';
+            $details = [$output['error']['summary'] ?? 'npm audit failed.'];
+
+            if ($code === 'ENOLOCK') {
+                $details[] = 'Yarn / pnpm projects: run `yarn npm audit` or `pnpm audit` in CI, or add a package-lock.json.';
+            }
+
+            return CheckResult::warn("`npm audit` failed ({$code}) — dependencies were not audited.", $details);
+        }
+
         $vulnerabilities = $output['vulnerabilities'] ?? [];
 
         $critical = 0;
@@ -66,5 +84,19 @@ class NpmAuditCheck extends AbstractCheck
         }
 
         return CheckResult::pass('No known CVEs in NPM dependencies.');
+    }
+
+    /**
+     * @return array<string, mixed>|null  Decoded JSON report, or null when npm failed.
+     */
+    protected function npmAudit(?string &$error = null): ?array
+    {
+        $process = new Process(['npm', 'audit', '--json'], $this->basePath, timeout: 120);
+        $process->run();
+
+        $error = self::firstLine($process->getErrorOutput(), ['npm warn']);
+        $output = json_decode($process->getOutput(), true);
+
+        return is_array($output) ? $output : null;
     }
 }

@@ -45,6 +45,10 @@ return [
         Checks\InsecureRngCheck::class => true,
         Checks\SessionSecurityCheck::class => true,
         Checks\EolVersionCheck::class => true,
+        Checks\OutdatedPackagesCheck::class => true,
+        Checks\AbandonedPackagesCheck::class => true,
+        Checks\ComposerConfigCheck::class => true,
+        Checks\XxeCheck::class => true,
     ],
 
     /*
@@ -84,6 +88,29 @@ return [
             // release of the scanner cannot block its own user's deploy.
             'andreapollastri/checkpoint',
             // 'vendor/package',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Outdated Composer Packages
+    |--------------------------------------------------------------------------
+    |
+    | The "Outdated Composer Packages" check runs `composer outdated --direct`
+    | against composer.lock and warns about direct dependencies that are
+    | behind their latest release. Only production dependencies are checked
+    | unless `include_dev` is true.
+    |
+    | Add package names to `ignore` for dependencies you deliberately pin —
+    | exact matches or `vendor/*` wildcards are both supported.
+    |
+    */
+
+    'outdated_packages' => [
+        'include_dev' => false,
+        'ignore' => [
+            // 'vendor/package',
+            // 'acme/*',
         ],
     ],
 
