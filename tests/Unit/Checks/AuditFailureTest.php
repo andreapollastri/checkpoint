@@ -81,6 +81,83 @@ class AuditFailureTest extends TestCase
         $this->assertSame(CheckResult::PASS, $result->status);
     }
 
+    public function test_npm_audit_warns_when_no_lock_file_exists(): void
+    {
+        $workspace = $this->makeWorkspace();
+        $this->writeFile($workspace, 'package.json', '{"name":"app"}');
+
+        $result = $this->npmAudit($workspace, ['vulnerabilities' => []])->run();
+
+        $this->assertSame(CheckResult::WARN, $result->status);
+        $this->assertStringContainsString('bun.lock', $result->message);
+    }
+
+    public function test_bun_projects_are_audited_with_bun(): void
+    {
+        foreach (['bun.lock', 'bun.lockb'] as $lockFile) {
+            $check = $this->npmAudit($this->npmWorkspace($lockFile), []);
+
+            $this->assertSame(CheckResult::PASS, $check->run()->status, $lockFile);
+            $this->assertSame('bun', $check->ran, $lockFile);
+        }
+    }
+
+    public function test_package_lock_takes_precedence_over_bun_lock(): void
+    {
+        $workspace = $this->npmWorkspace('package-lock.json');
+        $this->writeFile($workspace, 'bun.lock', '');
+
+        $check = $this->npmAudit($workspace, ['vulnerabilities' => []]);
+        $check->run();
+
+        $this->assertSame('npm', $check->ran);
+    }
+
+    public function test_bun_audit_warns_when_bun_produces_no_json(): void
+    {
+        $workspace = $this->npmWorkspace('bun.lock');
+
+        $result = $this->npmAudit($workspace, null, 'error: missing lockfile, nothing to audit')->run();
+
+        $this->assertSame(CheckResult::WARN, $result->status);
+        $this->assertStringContainsString('Could not run `bun audit`', $result->message);
+        $this->assertSame(['error: missing lockfile, nothing to audit'], $result->details);
+    }
+
+    public function test_bun_audit_reports_the_most_severe_advisory_per_package(): void
+    {
+        $workspace = $this->npmWorkspace('bun.lock');
+
+        $result = $this->npmAudit($workspace, [
+            'minimist' => [
+                ['id' => 1096466, 'title' => 'Prototype Pollution (moderate)', 'severity' => 'moderate'],
+                ['id' => 1097677, 'title' => 'Prototype Pollution in minimist', 'severity' => 'critical'],
+            ],
+            'lodash' => [
+                ['id' => 1106913, 'title' => 'Command Injection in lodash', 'severity' => 'high'],
+            ],
+        ])->run();
+
+        $this->assertSame(CheckResult::FAIL, $result->status);
+        $this->assertSame('1 critical vulnerability/ies in NPM dependencies.', $result->message);
+        $this->assertSame([
+            '[critical] minimist: Prototype Pollution in minimist',
+            '[high] lodash: Command Injection in lodash',
+        ], $result->details);
+    }
+
+    public function test_bun_audit_points_to_bun_for_low_severity_details(): void
+    {
+        $workspace = $this->npmWorkspace('bun.lock');
+
+        $result = $this->npmAudit($workspace, [
+            'is-thing' => [['title' => 'ReDoS', 'severity' => 'moderate']],
+        ])->run();
+
+        $this->assertSame(CheckResult::WARN, $result->status);
+        $this->assertStringContainsString('run `bun audit` for details', $result->message);
+    }
+
     private function npmWorkspace(string $lockFile): string
     {
         $workspace = $this->makeWorkspace();
@@ -118,6 +195,9 @@ class AuditFailureTest extends TestCase
     {
         return new class($workspace, $report, $error) extends NpmAuditCheck
         {
+            /** Which tool the check shelled out to: "npm" or "bun". */
+            public ?string $ran = null;
+
             public function __construct(string $basePath, private readonly ?array $report, private readonly string $fakeError)
             {
                 parent::__construct($basePath);
@@ -125,6 +205,15 @@ class AuditFailureTest extends TestCase
 
             protected function npmAudit(?string &$error = null): ?array
             {
+                $this->ran = 'npm';
+                $error = $this->fakeError;
+
+                return $this->report;
+            }
+
+            protected function bunAudit(?string &$error = null): ?array
+            {
+                $this->ran = 'bun';
                 $error = $this->fakeError;
 
                 return $this->report;

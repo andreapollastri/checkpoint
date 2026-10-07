@@ -40,6 +40,10 @@ jobs:
         if: hashFiles('package-lock.json') != ''
         run: npm ci --ignore-scripts
 
+      - name: Set up Bun
+        if: hashFiles('bun.lock', 'bun.lockb') != ''
+        uses: oven-sh/setup-bun@v2
+
       - name: Run Checkpoint
         run: |
           set -o pipefail

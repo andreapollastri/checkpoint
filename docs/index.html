@@ -1172,7 +1172,8 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
           <p style="margin-top:0.85rem">
             Writes <code>.github/workflows/checkpoint.yml</code>: runs on push to
             <code>main</code>/<code>master</code> and on every PR, PHP 8.2 with Composer cache,
-            optional Node + <code>npm ci</code> when <code>package-lock.json</code> is present, and
+            optional Node + <code>npm ci</code> when <code>package-lock.json</code> is present, Bun when
+            <code>bun.lock</code> / <code>bun.lockb</code> is present, and
             <code>checkpoint:scan --json</code> with the report uploaded as an artifact.
             Pass <code>--force</code> to overwrite an existing workflow.
           </p>
@@ -1321,7 +1322,7 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
                 <tr>
                   <td>2</td>
                   <td class="check-name">NPM CVE Audit<span class="check-class">Checks\NpmAuditCheck::class</span></td>
-                  <td><code>npm audit</code> critical / high findings</td>
+                  <td><code>npm audit</code> / <code>bun audit</code> critical / high findings</td>
                   <td><span class="sev sev-mixed">Fail / Warn</span></td>
                 </tr>
                 <tr>

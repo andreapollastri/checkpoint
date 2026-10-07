@@ -13,7 +13,7 @@ php artisan checkpoint:scan
 | #   | Check                                                                                                                                                                                                       | Severity        |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
 | 1   | **Composer CVE Audit** — runs `composer audit` against `composer.lock` and reports known advisories; warns (never passes) if Composer cannot run                                                            | `FAIL` / `WARN` |
-| 2   | **NPM CVE Audit** — runs `npm audit` and flags critical/high vulnerabilities; warns if npm cannot run or the lockfile is unsupported (yarn/pnpm)                                                            | `FAIL` / `WARN` |
+| 2   | **NPM CVE Audit** — runs `npm audit` (or `bun audit` for Bun projects with `bun.lock` / `bun.lockb`) and flags critical/high vulnerabilities; warns if the tool cannot run or the lockfile is unsupported (yarn/pnpm) | `FAIL` / `WARN` |
 | 3   | **Environment Configuration** — `APP_DEBUG`, `APP_KEY`, `APP_URL`, `SESSION_SECURE_COOKIE`                                                                                                                  | `WARN`          |
 | 4   | **`.gitignore` Sensitive Files** — ensures `.env`, `*.key`, `*.pem`, `auth.json` are excluded; detects if `.env` or `auth.json` is tracked by git                                                           | `FAIL`          |
 | 5   | **File Permissions** — flags world-readable `.env` or world-writable `storage/`                                                                                                                             | `WARN`          |
@@ -348,7 +348,7 @@ Checkpoint can scaffold a ready-to-use pipeline for either provider in one comma
 php artisan checkpoint:github
 ```
 
-Creates `.github/workflows/checkpoint.yml` — triggers on push to `main`/`master` and on every pull request. Uses `actions/checkout@v4`, `shivammathur/setup-php@v2` (PHP 8.2), Composer cache, optional Node/`npm ci` when `package-lock.json` is present, and runs `php artisan checkpoint:scan --json` with the report uploaded as an artifact. Pass `--force` to overwrite an existing file.
+Creates `.github/workflows/checkpoint.yml` — triggers on push to `main`/`master` and on every pull request. Uses `actions/checkout@v4`, `shivammathur/setup-php@v2` (PHP 8.2), Composer cache, optional Node/`npm ci` when `package-lock.json` is present, Bun when `bun.lock` / `bun.lockb` is present, and runs `php artisan checkpoint:scan --json` with the report uploaded as an artifact. Pass `--force` to overwrite an existing file.
 
 ### GitLab CI
 

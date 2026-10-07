@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-10-07
+
+### Fixed
+
+- NPM CVE Audit no longer skips Bun projects: when `bun.lock` / `bun.lockb` is present (and no `package-lock.json`), dependencies are audited with `bun audit`; it warns if Bun cannot run
+
+### Changed
+
+- The GitHub workflow stub (`checkpoint:github`) sets up Bun when a Bun lockfile is present
+
 ## [1.2.0] - 2026-10-07
 
 ### Added
@@ -228,6 +238,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Hardened Hardcoded Secrets detection before the first tagged release
 
+[1.2.1]: https://github.com/andreapollastri/checkpoint/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/andreapollastri/checkpoint/compare/1.1.8...1.2.0
 [1.1.8]: https://github.com/andreapollastri/checkpoint/compare/1.1.7...1.1.8
 [1.1.7]: https://github.com/andreapollastri/checkpoint/compare/1.1.6...1.1.7
