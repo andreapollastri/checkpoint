@@ -42,12 +42,15 @@ php artisan checkpoint:scan
 | 28  | **Abandoned Composer Packages** — flags packages marked abandoned in `composer.lock`, with the suggested replacement                                                                                        | `WARN`          |
 | 29  | **Composer Configuration** — flags `secure-http: false`, `disable-tls`, `http://` repositories, credentials in `composer.json`, `allow-plugins: true`, unstable `minimum-stability`, and silenced audits    | `FAIL` / `WARN` |
 | 30  | **XML External Entity (XXE) Risks** — detects `LIBXML_NOENT`, `LIBXML_DTDLOAD`, `libxml_disable_entity_loader(false)` and other opt-ins to entity/DTD loading                                               | `FAIL`          |
+| 31  | **PHP CVE Audit** — matches the running PHP version against a bundled database of PHP security releases (CVE / GHSA per release) plus the live php.net release feed; flags end-of-life branches and pre-release builds | `FAIL` / `WARN` |
+| 32  | **PHP Configuration (php.ini)** — audits the CLI runtime, `public/.user.ini` and the web-SAPI `php.ini` for `allow_url_include`, `display_errors`, `expose_php`, `auto_prepend_file`, `cgi.force_redirect`, active Xdebug and more | `FAIL` / `WARN` |
+| 33  | **Public Directory Exposure** — finds `.env`, `.git`, `phpinfo()`, Adminer / phpMyAdmin, SQL dumps and stray PHP files under `public/`, executable files in `storage/app/public`, and a web-served project root | `FAIL` / `WARN` |
 
 ---
 
 ## Requirements
 
-- **PHP** `^8.1` is the package floor. Newer Laravel versions may require a higher PHP, so your effective minimum is whatever your Laravel major demands.
+- **PHP** `8.1` – `8.6`. `^8.1` is the package floor; newer Laravel versions may require a higher PHP, so your effective minimum is whatever your Laravel major demands.
 - **Laravel** `8`–`13` (same major as `illuminate/*` 8.x–13.x used by your app)
 
 ---
@@ -144,7 +147,7 @@ Checkpoint works out of the box with sensible defaults. Publish the config file 
 php artisan vendor:publish --tag=checkpoint-config
 ```
 
-This creates `config/checkpoint.php` with sections for toggles, custom checks, freshness, outdated packages, suppressions, and path exclusions.
+This creates `config/checkpoint.php` with sections for toggles, custom checks, freshness, outdated packages, PHP CVE / `php.ini` auditing, suppressions, and path exclusions.
 
 ### Enabling / disabling checks
 
@@ -208,6 +211,57 @@ Listed classes are appended after the built-ins when you run `php artisan checkp
 
 The check runs `composer outdated --locked --direct`, so it needs network access to Packagist but not a populated `vendor/`.
 
+### PHP CVE Audit
+
+```php
+'php_cve' => [
+    'live_lookup' => true,
+],
+```
+
+The check compares the PHP version running the scan with two sources:
+
+- a **bundled database** (`resources/php-advisories.php`) of every PHP security release since 8.1 and the CVE / GHSA advisories each one fixes, generated from the official php.net changelog — one finding per advisory, e.g. `CVE-2024-4577 — CGI: Bypass of CVE-2012-1823, Argument Injection in PHP-CGI (fixed in PHP 8.3.8)`;
+- the **php.net release feed** (one HTTPS request to `www.php.net/releases`), so a security release published after your installed Checkpoint version is still caught.
+
+It also fails for end-of-life branches (advisories fixed elsewhere are never backported) and warns for pre-release builds (alpha / beta / RC).
+
+- `live_lookup` — set to `false` for air-gapped CI. The check then relies on the bundled database only and says so in its message. When the lookup is enabled but php.net is unreachable, the check **warns** rather than reporting a PASS it cannot back up.
+- **Ubuntu builds** (`8.3.6-0ubuntu0.24.04.x`) are reported as `WARN` instead of `FAIL`: Ubuntu backports security fixes without changing the upstream version, so the version number alone does not prove the build is vulnerable. Other distributions that backport silently (e.g. RHEL AppStream) cannot be told apart from upstream builds — suppress the advisories your vendor has patched.
+- Advisories that only affect Windows are skipped on other operating systems.
+- Each advisory is suppressed by its id, so the hash stays the same on every machine and PHP version.
+
+### PHP configuration (`php.ini`)
+
+```php
+'php_ini' => [
+    'files' => [
+        // '/usr/local/etc/php-fpm/php.ini',
+        // '/etc/php/8.6/fpm/conf.d',
+    ],
+],
+```
+
+`php artisan` runs on the CLI, whose configuration is not always the one your web server uses. The check therefore audits every configuration it can reach:
+
+- the **CLI runtime** — the values from `php.ini`, not the ones Laravel overrides while booting;
+- **`public/.user.ini`**, when present;
+- on **Debian / Ubuntu**, the `php.ini` and `conf.d/*.ini` of the web SAPIs installed next to the CLI one (`/etc/php/X.Y/{fpm,apache2,cgi}`);
+- any file or `conf.d` directory listed in `files` (absolute, or relative to the project root). A listed file that cannot be read is reported — never silently skipped.
+
+Setups where CLI and FPM share one `php.ini` (the official Docker images, Homebrew) are already covered by the runtime audit. Files are judged only on the directives they set explicitly, and per-pool PHP-FPM overrides (`php_admin_value[...]`) are not read.
+
+| Directive | Flagged when | Severity |
+| --- | --- | --- |
+| `allow_url_include` | `On` — remote file inclusion; also the switch flipped by PHP-CGI argument-injection exploits (CVE-2012-1823, CVE-2024-4577) | `FAIL` |
+| `display_errors`, `display_startup_errors` | `On` — errors printed to visitors | `WARN` |
+| `expose_php` | `On` — `X-Powered-By` advertises the exact PHP version | `WARN` |
+| `zend.exception_ignore_args` | `Off` — stack traces carry function arguments (passwords, tokens) | `WARN` |
+| `error_include_args` (PHP 8.6+) | `On` — error messages carry function arguments | `WARN` |
+| `auto_prepend_file`, `auto_append_file` | set — runs on every request; a common webshell persistence trick (Herd's dump loader is ignored) | `WARN` |
+| `cgi.force_redirect` | `0` — php-cgi reachable directly (CVE-2012-1823, CVE-2024-8927) | `WARN` |
+| `xdebug.mode`, `xdebug.discover_client_host` | Xdebug active / connecting back to any client | `WARN` |
+
 ### Suppressing individual findings
 
 Every `WARN` or `FAIL` finding is shown with a stable 12-character hash:
@@ -263,7 +317,7 @@ Paths are relative to the project root. Leading and trailing slashes are optiona
   Laravel Security Scanner — andreapollastri/checkpoint
   Scanning: /var/www/my-app
 
-  26/26 [============================] 100% Hardcoded Secrets
+  33/33 [============================] 100% Public Directory Exposure
 
   PASS  Composer CVE Audit
         No known CVEs in Composer dependencies.
@@ -285,7 +339,7 @@ Paths are relative to the project root. Leading and trailing slashes are optiona
           ⚑ APP_URL is set to "http://localhost" — update it for production.    [6e5d4c3b2a1f]
 
   ─────────────────────────────────────────────────────────
-  Summary  19 passed  4 warning(s)  2 failed  (25 checks total)
+  Summary  27 passed  4 warning(s)  2 failed  (33 checks total)
 
   Scan result: FAIL — fix the issues above before deploying.
 ```
@@ -348,7 +402,7 @@ Checkpoint can scaffold a ready-to-use pipeline for either provider in one comma
 php artisan checkpoint:github
 ```
 
-Creates `.github/workflows/checkpoint.yml` — triggers on push to `main`/`master` and on every pull request. Uses `actions/checkout@v4`, `shivammathur/setup-php@v2` (PHP 8.2), Composer cache, optional Node/`npm ci` when `package-lock.json` is present, Bun when `bun.lock` / `bun.lockb` is present, and runs `php artisan checkpoint:scan --json` with the report uploaded as an artifact. Pass `--force` to overwrite an existing file.
+Creates `.github/workflows/checkpoint.yml` — triggers on push to `main`/`master` and on every pull request. Uses `actions/checkout@v4`, `shivammathur/setup-php@v2` (the PHP version running the command, or `--php=8.6` to pick one), Composer cache, optional Node/`npm ci` when `package-lock.json` is present, Bun when `bun.lock` / `bun.lockb` is present, and runs `php artisan checkpoint:scan --json` with the report uploaded as an artifact. Pass `--force` to overwrite an existing file.
 
 ### GitLab CI
 
@@ -436,8 +490,25 @@ src/
     ├── OutdatedPackagesCheck.php
     ├── AbandonedPackagesCheck.php
     ├── ComposerConfigCheck.php
-    └── XxeCheck.php
+    ├── XxeCheck.php
+    ├── PhpCveCheck.php
+    ├── PhpIniCheck.php
+    └── PublicExposureCheck.php
+resources/
+└── php-advisories.php              # bundled PHP security releases + CVEs (generated)
+scripts/
+└── update-php-advisories.php       # regenerates the database from php.net
 ```
+
+### Updating the PHP advisory database
+
+`resources/php-advisories.php` is generated — do not edit it by hand. After a PHP security release, run:
+
+```bash
+php scripts/update-php-advisories.php
+```
+
+It rebuilds the file from the php.net changelog and release feed. Between Checkpoint releases, the live lookup covers the gap.
 
 ---
 

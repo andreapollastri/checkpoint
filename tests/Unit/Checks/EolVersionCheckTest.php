@@ -45,6 +45,18 @@ class EolVersionCheckTest extends TestCase
         );
     }
 
+    public function test_php_8_6_is_supported_until_the_end_of_2030(): void
+    {
+        $atRelease = $this->check('8.6.0', null, '2026-11-19')->run();
+        $lastYear = $this->check('8.6.14', null, '2030-01-15')->run();
+        $after = $this->check('8.6.14', null, '2031-01-01')->run();
+
+        $this->assertSame(CheckResult::PASS, $atRelease->status);
+        $this->assertSame(CheckResult::WARN, $lastYear->status);
+        $this->assertStringContainsString('until 2030-12-31', $lastYear->details[0]);
+        $this->assertSame(CheckResult::FAIL, $after->status);
+    }
+
     public function test_laravel_11_is_eol_after_march_2026(): void
     {
         $before = $this->check('8.4.0', 'v11.45.0', '2026-03-12')->run();

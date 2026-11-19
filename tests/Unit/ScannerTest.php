@@ -78,11 +78,25 @@ class ScannerTest extends TestCase
         $scanner = Scanner::withDefaultChecks($workspace);
         $results = $scanner->run();
 
-        // The config ships 30 default checks, all enabled out of the box.
-        $this->assertCount(30, $results);
+        // The config ships 33 default checks, all enabled out of the box.
+        $this->assertCount(33, $results);
         $this->assertArrayHasKey('Hardcoded Secrets', $results);
         $this->assertArrayHasKey('SQL Injection Risks', $results);
         $this->assertArrayHasKey('EOL Versions', $results);
+        $this->assertArrayHasKey('PHP CVE Audit', $results);
+        $this->assertArrayHasKey('PHP Configuration (php.ini)', $results);
+        $this->assertArrayHasKey('Public Directory Exposure', $results);
+    }
+
+    public function test_config_lists_every_default_check(): void
+    {
+        $listed = array_keys((array) config('checkpoint.checks'));
+        $registered = array_map(
+            fn (AbstractCheck $check): string => $check::class,
+            Scanner::withDefaultChecks($this->makeWorkspace())->checks(),
+        );
+
+        $this->assertSame($registered, $listed);
     }
 
     public function test_with_default_checks_skips_checks_disabled_in_config(): void
@@ -122,7 +136,7 @@ class ScannerTest extends TestCase
         $results = Scanner::withDefaultChecks($workspace)->run();
 
         $this->assertArrayHasKey('Extra Custom Check', $results);
-        $this->assertCount(31, $results);
+        $this->assertCount(34, $results);
     }
 
     public function test_extra_checks_can_be_disabled_via_checks_map(): void

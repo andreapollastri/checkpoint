@@ -823,7 +823,7 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
   <section id="coverage" class="band">
     <div class="section-inner">
       <div class="section-kicker">Coverage</div>
-      <h2 class="section-title">Thirty checks.<br>One pass.</h2>
+      <h2 class="section-title">Thirty-three checks.<br>One pass.</h2>
       <p class="section-lead">
         From lockfile advisories to Laravel config traps and the static patterns that keep biting
         real apps. Full catalogue in
@@ -861,6 +861,13 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
           <span class="name">Dependency hygiene</span>
           <span class="desc">Outdated and abandoned Composer packages, insecure composer.json settings, XXE
             parser flags.</span>
+          <span class="sev sev-mixed">Fail / Warn</span>
+        </div>
+        <div class="coverage-row">
+          <span class="n">31–33</span>
+          <span class="name">PHP &amp; web root</span>
+          <span class="desc">CVEs in the running PHP version, risky php.ini directives, files exposed through
+            public/.</span>
           <span class="sev sev-mixed">Fail / Warn</span>
         </div>
       </div>
@@ -941,7 +948,7 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
         <article class="doc-block" id="doc-requirements">
           <h3>Requirements</h3>
           <ul>
-            <li><strong>PHP</strong> <code>^8.1</code> (your Laravel major may require higher)</li>
+            <li><strong>PHP</strong> <code>8.1</code>–<code>8.6</code> (your Laravel major may require higher)</li>
             <li><strong>Laravel</strong> <code>8</code>–<code>13</code> (<code>illuminate/support</code> +
               <code>illuminate/console</code>)</li>
           </ul>
@@ -1123,6 +1130,31 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
             you pin on purpose. Set <code>outdated_packages.include_dev</code> to <code>true</code> to
             also report <code>require-dev</code> dependencies.
           </p>
+
+          <h4>PHP CVE audit</h4>
+          <p>
+            The running PHP version is matched against a bundled database of PHP security releases
+            (CVE / GHSA per release, generated from the php.net changelog) and the live php.net release
+            feed. Set <code>php_cve.live_lookup</code> to <code>false</code> for air-gapped CI; the check
+            then relies on the bundled database only. Ubuntu builds report WARN instead of FAIL because
+            fixes may be backported without a version bump.
+          </p>
+
+          <h4>php.ini files</h4>
+          <div class="code-block">
+            <div class="code-header"><span>php — config/checkpoint.php</span></div>
+            <pre><span class="tok-flag">'php_ini'</span> => [
+    <span class="tok-flag">'files'</span> => [
+        <span class="tok-arg">'/usr/local/etc/php-fpm/php.ini'</span>,
+    ],
+],</pre>
+          </div>
+          <p style="margin-top:0.85rem">
+            The scan runs on the CLI, so it audits the CLI runtime, <code>public/.user.ini</code> and —
+            on Debian / Ubuntu — the <code>php.ini</code> of the web SAPIs under
+            <code>/etc/php/X.Y/</code>. List any other <code>php.ini</code> or <code>conf.d</code>
+            directory your web server uses here.
+          </p>
         </article>
 
         <article class="doc-block" id="doc-extending">
@@ -1171,7 +1203,8 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
           </div>
           <p style="margin-top:0.85rem">
             Writes <code>.github/workflows/checkpoint.yml</code>: runs on push to
-            <code>main</code>/<code>master</code> and on every PR, PHP 8.2 with Composer cache,
+            <code>main</code>/<code>master</code> and on every PR, the PHP version running the command
+            (or <code>--php=8.6</code>) with Composer cache,
             optional Node + <code>npm ci</code> when <code>package-lock.json</code> is present, Bun when
             <code>bun.lock</code> / <code>bun.lockb</code> is present, and
             <code>checkpoint:scan --json</code> with the report uploaded as an artifact.
@@ -1519,6 +1552,29 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
                   <td><code>LIBXML_NOENT</code>, <code>LIBXML_DTDLOAD</code>, re-enabled entity loader</td>
                   <td><span class="sev sev-fail">Fail</span></td>
                 </tr>
+                <tr>
+                  <td>31</td>
+                  <td class="check-name">PHP CVE Audit<span class="check-class">Checks\PhpCveCheck::class</span></td>
+                  <td>Running PHP version missing security releases (CVE / GHSA per release), end-of-life
+                    branches, pre-release builds</td>
+                  <td><span class="sev sev-mixed">Fail / Warn</span></td>
+                </tr>
+                <tr>
+                  <td>32</td>
+                  <td class="check-name">PHP Configuration (php.ini)<span
+                      class="check-class">Checks\PhpIniCheck::class</span></td>
+                  <td><code>allow_url_include</code>, <code>display_errors</code>, <code>expose_php</code>,
+                    <code>auto_prepend_file</code>, <code>cgi.force_redirect</code>, active Xdebug</td>
+                  <td><span class="sev sev-mixed">Fail / Warn</span></td>
+                </tr>
+                <tr>
+                  <td>33</td>
+                  <td class="check-name">Public Directory Exposure<span
+                      class="check-class">Checks\PublicExposureCheck::class</span></td>
+                  <td><code>.env</code>, <code>.git</code>, <code>phpinfo()</code>, Adminer, SQL dumps and stray
+                    PHP under <code>public/</code>; PHP files in <code>storage/app/public</code></td>
+                  <td><span class="sev sev-mixed">Fail / Warn</span></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1534,6 +1590,11 @@ Summary  <span class="t-pass">23 passed</span>  <span class="t-warn">2 warn</spa
             <li>
               Environment checks read the <strong>runtime config</strong> of the process running
               Artisan — not necessarily your production <code>.env</code>.
+            </li>
+            <li>
+              PHP CVE Audit and PHP Configuration judge the <strong>PHP binary running Artisan</strong>
+              (the CLI). Run the scan on the server, or in the image you deploy, and list the web
+              server's <code>php.ini</code> under <code>php_ini.files</code> when it differs.
             </li>
             <li>
               NPM audit needs Node and a lockfile on the machine that runs the scan.

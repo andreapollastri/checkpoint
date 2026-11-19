@@ -2,6 +2,8 @@
 
 namespace Checkpoint\Tests\Feature;
 
+use Checkpoint\Checks\EolVersionCheck;
+use Checkpoint\Checks\PhpCveCheck;
 use Checkpoint\Tests\TestCase;
 use Illuminate\Support\Facades\Artisan;
 
@@ -22,6 +24,13 @@ class ScanCommandTest extends TestCase
         ])."\n");
 
         $this->app->setBasePath($workspace);
+
+        // These two judge the PHP binary running the suite, not the workspace:
+        // an outdated or end-of-life runner must not change the exit codes below.
+        config()->set('checkpoint.checks', [
+            PhpCveCheck::class => false,
+            EolVersionCheck::class => false,
+        ]);
 
         return $workspace;
     }

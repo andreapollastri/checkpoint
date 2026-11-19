@@ -49,6 +49,9 @@ return [
         Checks\AbandonedPackagesCheck::class => true,
         Checks\ComposerConfigCheck::class => true,
         Checks\XxeCheck::class => true,
+        Checks\PhpCveCheck::class => true,
+        Checks\PhpIniCheck::class => true,
+        Checks\PublicExposureCheck::class => true,
     ],
 
     /*
@@ -111,6 +114,49 @@ return [
         'ignore' => [
             // 'vendor/package',
             // 'acme/*',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | PHP CVE Audit
+    |--------------------------------------------------------------------------
+    |
+    | The "PHP CVE Audit" check compares the running PHP version against a
+    | bundled database of PHP security releases and the CVEs each one fixes.
+    |
+    | With `live_lookup` enabled it also asks php.net (one HTTPS request to
+    | www.php.net/releases) for security releases published after this
+    | version of Checkpoint, so a brand-new PHP CVE is caught without
+    | waiting for a package update. Set it to false for air-gapped CI — the
+    | check then relies on the bundled database only.
+    |
+    */
+
+    'php_cve' => [
+        'live_lookup' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | PHP Configuration (php.ini)
+    |--------------------------------------------------------------------------
+    |
+    | The "PHP Configuration (php.ini)" check audits the effective settings
+    | of the PHP process running the scan (the CLI), any public/.user.ini,
+    | and — on Debian / Ubuntu — the php.ini of the web SAPIs installed
+    | next to the CLI one (/etc/php/X.Y/{fpm,apache2,cgi}).
+    |
+    | When your web server uses a php.ini the scan cannot discover, list it
+    | here. Entries are php.ini files or conf.d directories, absolute or
+    | relative to the project root.
+    |
+    */
+
+    'php_ini' => [
+        'files' => [
+            // '/usr/local/etc/php-fpm/php.ini',
+            // '/etc/php/8.6/fpm/conf.d',
         ],
     ],
 

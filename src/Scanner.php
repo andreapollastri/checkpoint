@@ -124,6 +124,14 @@ class Scanner
             Checks\AbandonedPackagesCheck::class => fn () => new Checks\AbandonedPackagesCheck($basePath),
             Checks\ComposerConfigCheck::class => fn () => new Checks\ComposerConfigCheck($basePath),
             Checks\XxeCheck::class => fn () => new Checks\XxeCheck($basePath),
+            Checks\PhpCveCheck::class => fn () => new Checks\PhpCveCheck(
+                (bool) \config('checkpoint.php_cve.live_lookup', true),
+            ),
+            Checks\PhpIniCheck::class => fn () => new Checks\PhpIniCheck(
+                $basePath,
+                array_values(array_filter((array) \config('checkpoint.php_ini.files', []), 'is_string')),
+            ),
+            Checks\PublicExposureCheck::class => fn () => new Checks\PublicExposureCheck($basePath),
         ];
 
         $enabled = (array) \config('checkpoint.checks', []);

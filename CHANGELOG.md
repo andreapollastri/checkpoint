@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-11-19
+
+### Added
+
+- **PHP 8.6 support** — the suite passes on PHP 8.6 with no deprecations; EOL Versions knows the 8.6 branch (security support until 2030-12-31)
+- **PHP CVE Audit** check — matches the running PHP version against a bundled database of PHP security releases and the CVE / GHSA advisories each one fixes (generated from the php.net changelog, 8.1 onwards), plus the live php.net release feed for security releases newer than the bundle. Fails on missing security releases and end-of-life branches; warns on pre-release builds, on Ubuntu builds (fixes may be backported) and when php.net is unreachable. `php_cve.live_lookup` config
+- **PHP Configuration (php.ini)** check — audits the CLI runtime, `public/.user.ini`, the web-SAPI `php.ini` next to the CLI one on Debian / Ubuntu, and any file listed in `php_ini.files` for `allow_url_include` (FAIL), `display_errors`, `display_startup_errors`, `expose_php`, `zend.exception_ignore_args`, `error_include_args` (PHP 8.6), `auto_prepend_file` / `auto_append_file`, `cgi.force_redirect` and active Xdebug
+- **Public Directory Exposure** check — flags `.env`, `.git`, `phpinfo()` scripts, Adminer / phpMyAdmin and database dumps under `public/`, PHP files in `storage/app/public`, stray PHP entry points, backup archives, and an `index.php` / `.htaccess` in the project root
+- `checkpoint:github --php=` option
+- `scripts/update-php-advisories.php` to regenerate `resources/php-advisories.php` from php.net
+
+### Changed
+
+- The GitHub workflow stub (`checkpoint:github`) no longer pins PHP 8.2 (end-of-life on 2026-12-31): it uses the PHP version running the command, or `--php`
+
 ## [1.2.1] - 2026-10-07
 
 ### Fixed
@@ -238,6 +253,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Hardened Hardcoded Secrets detection before the first tagged release
 
+[Unreleased]: https://github.com/andreapollastri/checkpoint/compare/1.2.1...HEAD
 [1.2.1]: https://github.com/andreapollastri/checkpoint/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/andreapollastri/checkpoint/compare/1.1.8...1.2.0
 [1.1.8]: https://github.com/andreapollastri/checkpoint/compare/1.1.7...1.1.8

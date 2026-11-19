@@ -8,12 +8,13 @@ class EolVersionCheck extends AbstractCheck
     // WARN when it falls within WARN_WINDOW_DAYS. Versions older than the
     // first entry are treated as EOL; versions newer than the last as supported.
     // Sources: php.net/supported-versions, laravel.com/docs/releases#support-policy.
-    private const PHP_SECURITY_EOL = [
+    public const PHP_SECURITY_EOL = [
         '8.1' => '2025-12-31',
         '8.2' => '2026-12-31',
         '8.3' => '2027-12-31',
         '8.4' => '2028-12-31',
         '8.5' => '2029-12-31',
+        '8.6' => '2030-12-31', // GA 2026-11-19: two years active + two years security support
     ];
 
     private const LARAVEL_SECURITY_EOL = [

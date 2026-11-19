@@ -18,6 +18,16 @@ abstract class TestCase extends Orchestra
     }
 
     /**
+     * Keep the suite hermetic: the PHP CVE Audit check must not call php.net.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     */
+    protected function defineEnvironment($app): void
+    {
+        $app['config']->set('checkpoint.php_cve.live_lookup', false);
+    }
+
+    /**
      * @param  \Illuminate\Foundation\Application  $app
      * @return array<int, class-string>
      */
